@@ -10,4 +10,9 @@ public class Action
 	{
 		actionType = newActionType;
 	}
+
+	public ActionType getActionType()
+	{
+		return actionType;
+	}
 }
