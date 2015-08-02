@@ -14,6 +14,13 @@ public class WorldMap : MonoBehaviour
 	public GameObject agentPrefab;
 	public GameObject structurePrefab;
 
+	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
+	private int	_targetFramerate = 15; // fps
+	public 	int targetFramerate  = 15;
+
+	// how many pixels should be moved per second for an agent on the go.
+	private float moveSpeedMultiplier = 10.0f;
+
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
 
@@ -27,6 +34,7 @@ public class WorldMap : MonoBehaviour
 	#region Bookkeeping
 
 	private List<Agent> agents = new List<Agent>();
+	private List<int> workUnits = new List<int>();
 
 	// Obv. just a PH, but this is a list of the rectangular (axis-aligned) rectangular buildings
 	//   filling up the world.
@@ -39,10 +47,12 @@ public class WorldMap : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
-	#region MonoBehaviour methods
+	#region MonoBehaviour methods & helpers
 
 	void Start ()
 	{
+		targetFramerate = _targetFramerate;
+
 		// hard-coding size for now - camera in scene is set to work for this size as well.
 		initializeWorld(1024,768);
 		instantiateWorld();
@@ -51,6 +61,9 @@ public class WorldMap : MonoBehaviour
 
 	void Update ()
 	{
+		// 0. Update parameters
+		updateParameters();
+
 		// 1. If world is paused, exit early
 		if(paused)
 		{
@@ -58,6 +71,9 @@ public class WorldMap : MonoBehaviour
 		}
 
 		// 2. Else grab deltaTime, iterate over agents, ask them for action, run for deltaTime
+		// Storing it here because documentation doesn't make it clear if this will change.
+		// I don't expect so, but until I can verify experimentally, I'd like to ensure time
+		// equity between all agents.
 		float storedDeltaTime = Time.deltaTime;
 
 		foreach(Agent agent in agents)
@@ -65,10 +81,28 @@ public class WorldMap : MonoBehaviour
 			executeAction(agent, storedDeltaTime);
 		}
 
-		// 3. Lastly, update any remaining rendery bits.
+		// 3. Update any remaining rendery bits.
 		// ...
+
+		// 4. Allocate time to agents to process percepts and update plans
+		foreach(Agent agent in agents)
+		{
+			// Currently the '1' is meaningless - agents will just do their little calculation
+			// and be done with it.
+			agent.getBehavior().updatePlan( 1 );
+		}
 	}
-	#endregion MonoBehaviour methods
+
+	private void updateParameters()
+	{
+		if(targetFramerate != _targetFramerate)
+		{
+			_targetFramerate = targetFramerate;
+		}
+	}
+
+
+	#endregion MonoBehaviour methods & helpers
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
@@ -104,6 +138,7 @@ public class WorldMap : MonoBehaviour
 		GameObject tempGO;
 		Agent tempAgent;
 		Vector2 tempPosition = Vector2.zero;
+		AgentBehavior tempAgentBehavior;
 		for(int i=0; i<numLiving; i++)
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
@@ -116,6 +151,10 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(true);
 			tempAgent.setSightRange(5.0f);
+
+			tempAgentBehavior = new RandomWalkBehavior();
+
+			tempAgent.setBehavior(tempAgentBehavior);
 
 			agents.Add(tempAgent);
 		}
@@ -132,7 +171,11 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(false);
 			tempAgent.setSightRange(4.0f);
-			
+
+			tempAgentBehavior = new RandomWalkBehavior();
+
+			tempAgent.setBehavior(tempAgentBehavior);
+
 			agents.Add(tempAgent);
 		}
 	}
@@ -145,14 +188,7 @@ public class WorldMap : MonoBehaviour
 		int maxAttempts = 100; // heh
 		while(!valid && (attempts < maxAttempts)){
 			testPos = new Vector2(Random.Range(0.0f,worldWidth), Random.Range(0.0f,worldHeight));
-			valid = true;
-			for(int i=0; i<structures.Count; i++)
-			{
-				if(structures[i].Contains(testPos))
-				{
-					valid = false;
-				}
-			}
+			valid = isValidPosition( testPos );
 			attempts++;
 		}
 		if(attempts >= maxAttempts)
@@ -160,6 +196,26 @@ public class WorldMap : MonoBehaviour
 			Debug.LogError("Exceeded maximum attempts");
 		}
 		return testPos;
+	}
+
+	private bool isValidPosition(Vector2 testPos)
+	{
+		if(		testPos.x < 0
+		   || 	testPos.x >= worldWidth
+		   ||	testPos.y < 0
+		   ||	testPos.y >= worldHeight)
+		{
+			return false;
+		}
+
+		for(int i=0; i<structures.Count; i++)
+		{
+			if(structures[i].Contains(testPos))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void instantiateWorld()
@@ -188,12 +244,6 @@ public class WorldMap : MonoBehaviour
 		return new List<AgentPercept>();
 	}
 
-	#endregion Agent-World Interactions
-	//////////////////////////////////////////////////////////////////
-
-
-	//////////////////////////////////////////////////////////////////
-	#region Map updates
 	private void executeAction(Agent agent, float duration)
 	{
 		Action plan = agent.getBehavior().getCurrentPlan();
@@ -202,6 +252,13 @@ public class WorldMap : MonoBehaviour
 			case Action.ActionType.STAY:
 				return;
 			case Action.ActionType.MOVE_TOWARDS:
+				Vector2 newPoint = agent.getLocation() + plan.getTargetPoint().normalized * duration * moveSpeedMultiplier;
+
+				if(isValidPosition(newPoint))
+				{
+					agent.setLocation(newPoint);
+				}
+
 				return;
 			case Action.ActionType.TURN_BY_DEGREES:
 				return;
@@ -210,12 +267,6 @@ public class WorldMap : MonoBehaviour
 		}
 	}
 
-
-	#endregion Map updates
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
-	#region Map rendering
-	#endregion Map rendering
+	#endregion Agent-World Interactions
 	//////////////////////////////////////////////////////////////////
 }
