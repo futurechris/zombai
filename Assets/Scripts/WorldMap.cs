@@ -25,12 +25,8 @@ public class WorldMap : MonoBehaviour
 
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
-	// <agent.guid, agent>
-	private Dictionary<System.Guid, Agent> agents = new Dictionary<System.Guid, Agent>();
 
-	// <agent.guid, agent's most recent planned action
-	// For now these are primitive. Eventually likely want compound actions.
-	private Dictionary<System.Guid, Action> actions = new Dictionary<System.Guid, Action>();
+	private List<Agent> agents = new List<Agent>();
 
 	// Obv. just a PH, but this is a list of the rectangular (axis-aligned) rectangular buildings
 	//   filling up the world.
@@ -49,8 +45,8 @@ public class WorldMap : MonoBehaviour
 	{
 		// hard-coding size for now - camera in scene is set to work for this size as well.
 		initializeWorld(1024,768);
-		populateWorld(1,100);
 		instantiateWorld();
+		populateWorld(1,100);
 	}
 
 	void Update ()
@@ -61,19 +57,16 @@ public class WorldMap : MonoBehaviour
 			return;
 		}
 
-		// 2. Else grab deltaTime, iterate over actions, run them for that duration
+		// 2. Else grab deltaTime, iterate over agents, ask them for action, run for deltaTime
 		float storedDeltaTime = Time.deltaTime;
-		Action tempAction;
 
-		foreach(System.Guid guid in actions.Keys)
+		foreach(Agent agent in agents)
 		{
-			if(actions.TryGetValue(guid, out tempAction))
-			{
-				executeAction(guid, tempAction, storedDeltaTime);
-			}
+			executeAction(agent, storedDeltaTime);
 		}
 
 		// 3. Lastly, update any remaining rendery bits.
+		// ...
 	}
 	#endregion MonoBehaviour methods
 	//////////////////////////////////////////////////////////////////
@@ -117,12 +110,14 @@ public class WorldMap : MonoBehaviour
 			tempGO.transform.parent = agentsGO.transform;
 
 			tempPosition = getValidAgentPosition();
-			tempGO.transform.localPosition = tempPosition;
 
 			tempAgent = tempGO.GetComponent<Agent>();
 			tempAgent.setAgentColor(Color.green);
+			tempAgent.setLocation(tempPosition);
+			tempAgent.setIsAlive(true);
+			tempAgent.setSightRange(5.0f);
 
-			agents.Add(tempAgent.getGuid(), tempAgent);
+			agents.Add(tempAgent);
 		}
 
 		for(int i=0; i<numUndead; i++)
@@ -131,12 +126,14 @@ public class WorldMap : MonoBehaviour
 			tempGO.transform.parent = agentsGO.transform;
 			
 			tempPosition = getValidAgentPosition();
-			tempGO.transform.localPosition = tempPosition;
-			
+
 			tempAgent = tempGO.GetComponent<Agent>();
 			tempAgent.setAgentColor(Color.magenta);
+			tempAgent.setLocation(tempPosition);
+			tempAgent.setIsAlive(false);
+			tempAgent.setSightRange(4.0f);
 			
-			agents.Add(tempAgent.getGuid(), tempAgent);
+			agents.Add(tempAgent);
 		}
 	}
 
@@ -177,12 +174,6 @@ public class WorldMap : MonoBehaviour
 			structGO.transform.localScale = new Vector3(rect.width, rect.height, 1.0f);
 			structGO.transform.position = new Vector3(rect.x+(rect.width/2.0f), rect.y+(rect.height/2.0f), 5.0f);
 		}
-
-
-		// Agents
-		// loop over agents, instantiate prefabs, configure them according to initial populate method
-
-		// ...
 	}
 
 	#endregion World initialization, generation, etc.
@@ -190,12 +181,7 @@ public class WorldMap : MonoBehaviour
 
 	//////////////////////////////////////////////////////////////////
 	#region Agent-World Interactions
-
-	public void registerAction(System.Guid agentGuid, Action newAction)
-	{
-
-	}
-
+	
 	// Agent perceives world through this function alone.
 	public List<AgentPercept> getPercepts(Agent agent)
 	{
@@ -208,9 +194,10 @@ public class WorldMap : MonoBehaviour
 
 	//////////////////////////////////////////////////////////////////
 	#region Map updates
-	private void executeAction(System.Guid agentGuid, Action toExecute, float duration)
+	private void executeAction(Agent agent, float duration)
 	{
-		switch(toExecute.getActionType())
+		Action plan = agent.getBehavior().getCurrentPlan();
+		switch(plan.getActionType())
 		{
 			case Action.ActionType.STAY:
 				return;

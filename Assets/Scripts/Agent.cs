@@ -79,6 +79,7 @@ public class Agent : MonoBehaviour
 	public void setLocation(Vector2 newLocation)
 	{
 		location = newLocation;
+		this.transform.localPosition = newLocation;
 	}
 
 	public float getDirection()
