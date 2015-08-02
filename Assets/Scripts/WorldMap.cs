@@ -36,8 +36,8 @@ public class WorldMap : MonoBehaviour
 	//   filling up the world.
 	private List<Rect> structures = new List<Rect>();
 
-	private int worldWidth = 0;
-	private int worldHeight = 0;
+	private float worldWidth = 0;
+	private float worldHeight = 0;
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -64,6 +64,7 @@ public class WorldMap : MonoBehaviour
 		// 2. Else grab deltaTime, iterate over actions, run them for that duration
 		float storedDeltaTime = Time.deltaTime;
 		Action tempAction;
+
 		foreach(System.Guid guid in actions.Keys)
 		{
 			if(actions.TryGetValue(guid, out tempAction))
@@ -82,33 +83,86 @@ public class WorldMap : MonoBehaviour
 
 	// For now, just generates rectangular buildings
 	// width/height in ... pixels?
-	private void initializeWorld(int mapWidth, int mapHeight)
+	private void initializeWorld(float mapWidth, float mapHeight)
 	{
 		worldWidth = mapWidth;
 		worldHeight = mapHeight;
 
 		// Probably get something closer to a city by carving streets out 
 		//   rather than trying to fill with boxes.
-		int streetWidth = Mathf.Max(minimumStreetWidth, Mathf.FloorToInt(worldWidth * 0.01f));
+		float streetWidth = Mathf.Max(minimumStreetWidth, Mathf.Floor(worldWidth * 0.01f));
 
 		// But for current testing, just making some random rectangles.
 		for(int i=0; i<250; i++)
 		{
-			int xDim = Random.Range(3*streetWidth, 10*streetWidth);
-			int yDim = Random.Range(3*streetWidth, 10*streetWidth);
+			float xDim = Random.Range(3.0f*streetWidth, 10.0f*streetWidth);
+			float yDim = Random.Range(3.0f*streetWidth, 10.0f*streetWidth);
 
-			int xPos = Random.Range(0, worldWidth-xDim);
-			int yPos = Random.Range(0, worldHeight-yDim);
+			float xPos = Random.Range(0.0f, worldWidth-xDim);
+			float yPos = Random.Range(0.0f, worldHeight-yDim);
 
-			structures.Add (new Rect(xPos,yPos, xDim,yDim));
-			Debug.Log ("Adding ("+xDim+","+yDim+") @ ("+xPos+","+yPos+")");
+			structures.Add( new Rect(xPos,yPos, xDim,yDim) );
 		}
 	}
 	
 	// Create agents, give them behaviors and locations, turn them loose.
 	private void populateWorld(int numLiving, int numUndead)
 	{
+		GameObject tempGO;
+		Agent tempAgent;
+		Vector2 tempPosition = Vector2.zero;
+		for(int i=0; i<numLiving; i++)
+		{
+			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+			tempGO.transform.parent = agentsGO.transform;
 
+			tempPosition = getValidAgentPosition();
+			tempGO.transform.localPosition = tempPosition;
+
+			tempAgent = tempGO.GetComponent<Agent>();
+			tempAgent.setAgentColor(Color.green);
+
+			agents.Add(tempAgent.getGuid(), tempAgent);
+		}
+
+		for(int i=0; i<numUndead; i++)
+		{
+			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+			tempGO.transform.parent = agentsGO.transform;
+			
+			tempPosition = getValidAgentPosition();
+			tempGO.transform.localPosition = tempPosition;
+			
+			tempAgent = tempGO.GetComponent<Agent>();
+			tempAgent.setAgentColor(Color.magenta);
+			
+			agents.Add(tempAgent.getGuid(), tempAgent);
+		}
+	}
+
+	private Vector2 getValidAgentPosition()
+	{
+		Vector2 testPos = new Vector2(Random.Range(0.0f,worldWidth), Random.Range(0.0f,worldHeight));
+		bool valid = false;
+		int attempts = 0;
+		int maxAttempts = 100; // heh
+		while(!valid && (attempts < maxAttempts)){
+			testPos = new Vector2(Random.Range(0.0f,worldWidth), Random.Range(0.0f,worldHeight));
+			valid = true;
+			for(int i=0; i<structures.Count; i++)
+			{
+				if(structures[i].Contains(testPos))
+				{
+					valid = false;
+				}
+			}
+			attempts++;
+		}
+		if(attempts >= maxAttempts)
+		{
+			Debug.LogError("Exceeded maximum attempts");
+		}
+		return testPos;
 	}
 
 	private void instantiateWorld()
@@ -121,7 +175,7 @@ public class WorldMap : MonoBehaviour
 			structGO.transform.parent = structuresGO.transform;
 
 			structGO.transform.localScale = new Vector3(rect.width, rect.height, 1.0f);
-			structGO.transform.position = new Vector3(rect.x+(rect.width/2.0f), rect.y+(rect.height/2.0f), 0.0f);
+			structGO.transform.position = new Vector3(rect.x+(rect.width/2.0f), rect.y+(rect.height/2.0f), 5.0f);
 		}
 
 
