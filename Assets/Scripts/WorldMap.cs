@@ -56,7 +56,7 @@ public class WorldMap : MonoBehaviour
 		// hard-coding size for now - camera in scene is set to work for this size as well.
 		initializeWorld(1024,768);
 		instantiateWorld();
-		populateWorld(1,100);
+		populateWorld(1,10,100);
 	}
 
 	void Update ()
@@ -87,9 +87,13 @@ public class WorldMap : MonoBehaviour
 		// 4. Allocate time to agents to process percepts and update plans
 		foreach(Agent agent in agents)
 		{
-			// Currently the '1' is meaningless - agents will just do their little calculation
-			// and be done with it.
-			agent.getBehavior().updatePlan( getPercepts(agent), 1 );
+			// Currently the '1' work unit is meaningless - agents will just do their little
+			// calculation and be done with it.
+			if(		agent.getIsAlive() == AgentPercept.LivingState.ALIVE
+			   || 	agent.getIsAlive() == AgentPercept.LivingState.UNDEAD)
+			{
+				agent.getBehavior().updatePlan( getPercepts(agent), 1 );
+			}
 		}
 	}
 
@@ -133,7 +137,7 @@ public class WorldMap : MonoBehaviour
 	}
 	
 	// Create agents, give them behaviors and locations, turn them loose.
-	private void populateWorld(int numLiving, int numUndead)
+	private void populateWorld(int numLiving, int numCorpses, int numUndead)
 	{
 		GameObject tempGO;
 		Agent tempAgent;
@@ -157,6 +161,27 @@ public class WorldMap : MonoBehaviour
 			tempAgentBehavior = new RandomWalkBehavior();
 			tempAgent.setBehavior(tempAgentBehavior);
 
+			agents.Add(tempAgent);
+		}
+
+		for(int i=0; i<numCorpses; i++)
+		{
+			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+			tempGO.transform.parent = agentsGO.transform;
+			
+			tempPosition = getValidAgentPosition();
+			
+			tempAgent = tempGO.GetComponent<Agent>();
+			tempAgent.setAgentColor(Color.cyan);
+			tempAgent.setLocation(tempPosition);
+			tempAgent.setIsAlive(AgentPercept.LivingState.DEAD);
+			tempAgent.setSightRange(0.0f);
+			tempAgent.setFieldOfView(0.0f); // roughly full range of vision
+			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
+			
+			tempAgentBehavior = new NoopBehavior();
+			tempAgent.setBehavior(tempAgentBehavior);
+			
 			agents.Add(tempAgent);
 		}
 
