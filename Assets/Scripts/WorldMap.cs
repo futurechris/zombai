@@ -144,7 +144,7 @@ public class WorldMap : MonoBehaviour
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
 			tempGO.transform.parent = agentsGO.transform;
 
-			tempPosition = new Vector2(worldWidth/2, worldHeight/2);//getValidAgentPosition();
+			tempPosition = getValidAgentPosition();
 
 			tempAgent = tempGO.GetComponent<Agent>();
 			tempAgent.setAgentColor(Color.green);
