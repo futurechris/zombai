@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 public class AgentBehavior
 {
@@ -13,5 +14,5 @@ public class AgentBehavior
 		return currentPlan;
 	}
 
-	public virtual void updatePlan(int allottedWorkUnits) {}
+	public virtual void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {}
 }

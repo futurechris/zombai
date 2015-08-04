@@ -42,7 +42,7 @@ public class WorldMap : MonoBehaviour
 
 	private float worldWidth = 0;
 	private float worldHeight = 0;
-
+	
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
 
@@ -89,7 +89,7 @@ public class WorldMap : MonoBehaviour
 		{
 			// Currently the '1' is meaningless - agents will just do their little calculation
 			// and be done with it.
-			agent.getBehavior().updatePlan( 1 );
+			agent.getBehavior().updatePlan( getPercepts(agent), 1 );
 		}
 	}
 
@@ -144,16 +144,17 @@ public class WorldMap : MonoBehaviour
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
 			tempGO.transform.parent = agentsGO.transform;
 
-			tempPosition = getValidAgentPosition();
+			tempPosition = new Vector2(worldWidth/2, worldHeight/2);//getValidAgentPosition();
 
 			tempAgent = tempGO.GetComponent<Agent>();
 			tempAgent.setAgentColor(Color.green);
 			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(true);
+			tempAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
 			tempAgent.setSightRange(5.0f);
+			tempAgent.setFieldOfView(180.0f); // roughly full range of vision
+			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 
 			tempAgentBehavior = new RandomWalkBehavior();
-
 			tempAgent.setBehavior(tempAgentBehavior);
 
 			agents.Add(tempAgent);
@@ -169,8 +170,10 @@ public class WorldMap : MonoBehaviour
 			tempAgent = tempGO.GetComponent<Agent>();
 			tempAgent.setAgentColor(Color.magenta);
 			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(false);
+			tempAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
 			tempAgent.setSightRange(4.0f);
+			tempAgent.setFieldOfView(120.0f); // roughly human binocular vision
+			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 
 			tempAgentBehavior = new RandomWalkBehavior();
 
@@ -239,9 +242,73 @@ public class WorldMap : MonoBehaviour
 	#region Agent-World Interactions
 	
 	// Agent perceives world through this function alone.
-	public List<AgentPercept> getPercepts(Agent agent)
+	// N^2 or worse for now, oh well.
+	private List<AgentPercept> getPercepts(Agent agent)
 	{
-		return new List<AgentPercept>();
+		List<AgentPercept> apList = new List<AgentPercept>();
+
+		AgentPercept tempPercept;
+
+		for(int i=0; i<agents.Count; i++)
+		{
+			// For now not doing self-aware. No Skynet on *my* watch!
+			if(agent.getGuid() == agents[i].getGuid())
+			{
+				continue;
+			}
+			if(canPerceivePosition(agent, agents[i].getLocation()))
+			{
+				tempPercept 		= new AgentPercept();
+				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
+				tempPercept.locOne 	= agents[i].getLocation();
+				tempPercept.living 	= agents[i].getIsAlive();
+				apList.Add(tempPercept);
+				tempPercept 		= null;
+			}
+		}
+
+		List<AgentPercept> structureList = null;
+		for(int i=0; i<structures.Count; i++)
+		{
+			structureList = canPerceiveStructure(agent, structures[i]);
+			if(structureList != null)
+			{
+				apList.AddRange(structureList);
+			}
+			structureList = null;
+		}
+
+
+		return apList;
+	}
+
+	private bool canPerceivePosition(Agent who, Vector2 where)
+	{
+		// first, distance between who and where: <= vision distance?
+		Vector2 delta = where - who.getLocation();
+		
+		if( delta.magnitude > who.getSightRange())
+		{
+			return false;
+		}
+
+		// second: calculate angle between who and where, compare to
+		//		   agent's facing, see if it's within FOV
+		float whoToWhereAngle = Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
+		float shortest = Mathf.Abs(Mathf.DeltaAngle(whoToWhereAngle, who.getDirection()));
+
+		if(shortest <= (who.getFieldOfView()/2.0f))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	private List<AgentPercept> canPerceiveStructure(Agent who, Rect what)
+	{
+		// TODO: Calculate chunks of walls that are visible, return those.
+		return null;
 	}
 
 	private void executeAction(Agent agent, float duration)

@@ -8,15 +8,15 @@ public class Agent : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 	#region Agent traits
 
-	private	System.Guid guid		= System.Guid.NewGuid();
-	private Color agentColor 		= Color.cyan;
-	private bool isAlive			= true;
-	private AgentBehavior behavior	= new NoopBehavior();
+	private	System.Guid guid				= System.Guid.NewGuid();
+	private Color agentColor 				= Color.cyan;
+	private AgentPercept.LivingState living	= AgentPercept.LivingState.ALIVE;
+	private AgentBehavior behavior			= new NoopBehavior();
 
-	private Vector2 location		= Vector2.zero;
-	private float direction			= 0;
-	private float fieldOfView		= 0;
-	private float sightRange		= 0;
+	private Vector2 location				= Vector2.zero;
+	private float direction					= 0;
+	private float fieldOfView				= 0;
+	private float sightRange				= 0;
 
 	#endregion Agent traits
 	//////////////////////////////////////////////////////////////////
@@ -54,13 +54,13 @@ public class Agent : MonoBehaviour
 		agentSprite.color = agentColor;
 	}
 
-	public bool getIsAlive()
+	public AgentPercept.LivingState getIsAlive()
 	{
-		return isAlive;
+		return living;
 	}
-	public void setIsAlive(bool newState)
+	public void setIsAlive(AgentPercept.LivingState newState)
 	{
-		isAlive = newState;
+		living = newState;
 	}
 
 	public AgentBehavior getBehavior()

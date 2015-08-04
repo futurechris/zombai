@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class RandomWalkBehavior : AgentBehavior {
 
 	float updateDelay = 0.25f;
 	float nextUpdate = 0;
 
-	public override void updatePlan(int allottedWorkUnits)
+	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
 		if(nextUpdate > Time.realtimeSinceStartup)
 		{

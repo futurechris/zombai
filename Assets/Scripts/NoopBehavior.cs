@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NoopBehavior : AgentBehavior
 {
@@ -8,5 +9,5 @@ public class NoopBehavior : AgentBehavior
 		currentPlan = new Action(Action.ActionType.STAY);
 	}
 
-	public virtual void updatePlan(int allottedWorkUnits) {}
+	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {}
 }
