@@ -54,9 +54,9 @@ public class WorldMap : MonoBehaviour
 		targetFramerate = _targetFramerate;
 
 		// hard-coding size for now - camera in scene is set to work for this size as well.
-		initializeWorld(1024,768);
+		initializeWorld(1024,768,1);
 		instantiateWorld();
-		populateWorld(1,10,100);
+		populateWorld(10,10,200);
 	}
 
 	void Update ()
@@ -114,7 +114,7 @@ public class WorldMap : MonoBehaviour
 
 	// For now, just generates rectangular buildings
 	// width/height in ... pixels?
-	private void initializeWorld(float mapWidth, float mapHeight)
+	private void initializeWorld(float mapWidth, float mapHeight, int numBuildings)
 	{
 		worldWidth = mapWidth;
 		worldHeight = mapHeight;
@@ -124,7 +124,7 @@ public class WorldMap : MonoBehaviour
 		float streetWidth = Mathf.Max(minimumStreetWidth, Mathf.Floor(worldWidth * 0.01f));
 
 		// But for current testing, just making some random rectangles.
-		for(int i=0; i<250; i++)
+		for(int i=0; i<numBuildings; i++)
 		{
 			float xDim = Random.Range(3.0f*streetWidth, 10.0f*streetWidth);
 			float yDim = Random.Range(3.0f*streetWidth, 10.0f*streetWidth);
@@ -154,16 +154,38 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setAgentColor(Color.green);
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
-			tempAgent.setSightRange(5.0f);
-			tempAgent.setFieldOfView(180.0f); // roughly full range of vision
+			tempAgent.setSightRange(36.0f);
+			tempAgent.setFieldOfView(360.0f); // roughly full range of vision
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 
-			tempAgentBehavior = new RandomWalkBehavior();
+			tempAgentBehavior = new FleeBehavior();
 			tempAgent.setBehavior(tempAgentBehavior);
 
 			agents.Add(tempAgent);
 		}
 
+		for(int i=0; i<numUndead; i++)
+		{
+			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+			tempGO.transform.parent = agentsGO.transform;
+			
+			tempPosition = getValidAgentPosition();
+
+			tempAgent = tempGO.GetComponent<Agent>();
+			tempAgent.setAgentColor(Color.magenta);
+			tempAgent.setLocation(tempPosition);
+			tempAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
+			tempAgent.setSightRange(25.0f);
+			tempAgent.setFieldOfView(360.0f); // roughly human binocular vision
+			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
+
+			tempAgentBehavior = new PursueBehavior();
+			tempAgent.setBehavior(tempAgentBehavior);
+
+			agents.Add(tempAgent);
+		}
+
+		
 		for(int i=0; i<numCorpses; i++)
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
@@ -182,28 +204,6 @@ public class WorldMap : MonoBehaviour
 			tempAgentBehavior = new NoopBehavior();
 			tempAgent.setBehavior(tempAgentBehavior);
 			
-			agents.Add(tempAgent);
-		}
-
-		for(int i=0; i<numUndead; i++)
-		{
-			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
-			tempGO.transform.parent = agentsGO.transform;
-			
-			tempPosition = getValidAgentPosition();
-
-			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.setAgentColor(Color.magenta);
-			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
-			tempAgent.setSightRange(4.0f);
-			tempAgent.setFieldOfView(120.0f); // roughly human binocular vision
-			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
-
-			tempAgentBehavior = new RandomWalkBehavior();
-
-			tempAgent.setBehavior(tempAgentBehavior);
-
 			agents.Add(tempAgent);
 		}
 	}
@@ -344,7 +344,7 @@ public class WorldMap : MonoBehaviour
 			case Action.ActionType.STAY:
 				return;
 			case Action.ActionType.MOVE_TOWARDS:
-				Vector2 newPoint = agent.getLocation() + plan.getTargetPoint().normalized * duration * moveSpeedMultiplier;
+				Vector2 newPoint = agent.getLocation() + (plan.getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeedMultiplier;
 
 				if(isValidPosition(newPoint))
 				{

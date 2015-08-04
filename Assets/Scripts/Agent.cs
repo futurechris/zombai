@@ -70,6 +70,7 @@ public class Agent : MonoBehaviour
 	public void setBehavior(AgentBehavior newBehavior)
 	{
 		behavior = newBehavior;
+		newBehavior.setAgent(this);
 	}
 
 	public Vector2 getLocation()

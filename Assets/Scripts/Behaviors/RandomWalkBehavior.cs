@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class RandomWalkBehavior : AgentBehavior {
-
-	float updateDelay = 0.25f;
+public class RandomWalkBehavior : AgentBehavior
+{
+	float updateDelay = 0.5f;
 	float nextUpdate = 0;
 
 	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
@@ -22,7 +22,7 @@ public class RandomWalkBehavior : AgentBehavior {
 		float targetY = distance * Mathf.Sin(a);
 
 		Action newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-		newAction.setTargetPoint(new Vector2(targetX,targetY));
+		newAction.setTargetPoint(myself.getLocation() + new Vector2(targetX,targetY));
 
 		this.currentPlan = newAction;
 

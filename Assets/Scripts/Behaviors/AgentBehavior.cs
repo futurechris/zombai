@@ -5,6 +5,8 @@ public class AgentBehavior
 {
 	protected Action currentPlan = new Action(); // new Action() defaults to a NOOP ('STAY')
 
+	protected Agent myself;
+
 	public Action getCurrentPlan()
 	{
 		if(currentPlan == null)
@@ -14,5 +16,12 @@ public class AgentBehavior
 		return currentPlan;
 	}
 
+	public void setAgent(Agent newAgent)
+	{
+		myself = newAgent;
+	}
+
 	public virtual void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {}
+
+
 }
