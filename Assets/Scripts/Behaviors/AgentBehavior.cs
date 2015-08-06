@@ -16,12 +16,12 @@ public class AgentBehavior
 		return currentPlan;
 	}
 
-	public void setAgent(Agent newAgent)
+	public virtual void setAgent(Agent newAgent)
 	{
 		myself = newAgent;
 	}
 
-	public virtual void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {}
+	public virtual bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {return true;}
 
 
 }

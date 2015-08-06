@@ -19,7 +19,7 @@ public class WorldMap : MonoBehaviour
 	public 	int targetFramerate  = 15;
 
 	// how many pixels should be moved per second for an agent on the go.
-	private float moveSpeedMultiplier = 10.0f;
+	private float moveSpeed = 10.0f;
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -143,6 +143,7 @@ public class WorldMap : MonoBehaviour
 		Agent tempAgent;
 		Vector2 tempPosition = Vector2.zero;
 		AgentBehavior tempAgentBehavior;
+		FallThroughBehavior tempFTB;
 		for(int i=0; i<numLiving; i++)
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
@@ -157,9 +158,13 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setSightRange(36.0f);
 			tempAgent.setFieldOfView(360.0f); // roughly full range of vision
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
+			tempAgent.setSpeedMultiplier(1.15f);
 
-			tempAgentBehavior = new FleeBehavior();
-			tempAgent.setBehavior(tempAgentBehavior);
+			tempFTB = new FallThroughBehavior();
+			tempFTB.addBehavior( new FleeBehavior() );
+			tempFTB.addBehavior( new RandomWalkBehavior() );
+
+			tempAgent.setBehavior(tempFTB);
 
 			agents.Add(tempAgent);
 		}
@@ -179,8 +184,11 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setFieldOfView(360.0f); // roughly human binocular vision
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 
-			tempAgentBehavior = new PursueBehavior();
-			tempAgent.setBehavior(tempAgentBehavior);
+			tempFTB = new FallThroughBehavior();
+			tempFTB.addBehavior( new PursueBehavior() );
+			tempFTB.addBehavior( new RandomWalkBehavior() );
+
+			tempAgent.setBehavior(tempFTB);
 
 			agents.Add(tempAgent);
 		}
@@ -343,8 +351,9 @@ public class WorldMap : MonoBehaviour
 		{
 			case Action.ActionType.STAY:
 				return;
+
 			case Action.ActionType.MOVE_TOWARDS:
-				Vector2 newPoint = agent.getLocation() + (plan.getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeedMultiplier;
+				Vector2 newPoint = agent.getLocation() + (plan.getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
 
 				if(isValidPosition(newPoint))
 				{
@@ -352,8 +361,14 @@ public class WorldMap : MonoBehaviour
 				}
 
 				return;
+
 			case Action.ActionType.TURN_BY_DEGREES:
 				return;
+
+			case Action.ActionType.TURN_TO_DEGREES:
+				agent.setDirection( plan.getDirection() );
+				return;
+
 			case Action.ActionType.TURN_TOWARDS:
 				return;
 		}

@@ -8,14 +8,8 @@ public class FleeBehavior : AgentBehavior
 	float nextUpdate = 0;
 
 	// flee from nearest undead
-	// otherwise, wander aimlessly
-	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(nextUpdate > Time.realtimeSinceStartup)
-		{
-			return;
-		}
-
 		Action newAction;
 
 		float enemyDistance = float.MaxValue;
@@ -42,24 +36,10 @@ public class FleeBehavior : AgentBehavior
 			this.currentPlan = newAction;
 			
 			nextUpdate = Time.realtimeSinceStartup + updateDelay;
-			return;
+			return true;
 		}
 
-		// For now "wander aimlessly" means randomWalkBehavior
-
-		// pick a random angle in radians and walk in that direction
-		float a = Random.Range(0, 2.0f*Mathf.PI);
-		
-		float distance = 20; // unimportant, won't get that far in the small timesteps allowed.
-		float targetX = distance * Mathf.Cos(a);
-		float targetY = distance * Mathf.Sin(a);
-		
-		newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-		newAction.setTargetPoint(myself.getLocation() + new Vector2(targetX,targetY));
-		
-		this.currentPlan = newAction;
-		
-		nextUpdate = Time.realtimeSinceStartup + updateDelay;
+		return false;
 	}
 
 }

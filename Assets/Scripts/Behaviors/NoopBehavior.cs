@@ -9,5 +9,5 @@ public class NoopBehavior : AgentBehavior
 		currentPlan = new Action(Action.ActionType.STAY);
 	}
 
-	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {}
+	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {return true;}
 }

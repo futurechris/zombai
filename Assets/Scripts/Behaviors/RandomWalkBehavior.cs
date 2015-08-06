@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 public class RandomWalkBehavior : AgentBehavior
 {
-	float updateDelay = 0.5f;
+	float updateDelay = 1.0f;
 	float nextUpdate = 0;
 
-	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
 		if(nextUpdate > Time.realtimeSinceStartup)
 		{
-			return;
+			return false;
 		}
 
 		// pick a random angle in radians and walk in that direction
@@ -27,5 +27,7 @@ public class RandomWalkBehavior : AgentBehavior
 		this.currentPlan = newAction;
 
 		nextUpdate += updateDelay;
+
+		return true;
 	}
 }

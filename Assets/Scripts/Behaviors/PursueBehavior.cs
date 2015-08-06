@@ -9,13 +9,8 @@ public class PursueBehavior : AgentBehavior
 
 	// pursue nearest living agent
 	// otherwise wander aimlessly
-	public override void updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(nextUpdate > Time.realtimeSinceStartup)
-		{
-			return;
-		}
-
 		Action newAction;
 
 		float preyDistance = float.MaxValue;
@@ -34,30 +29,16 @@ public class PursueBehavior : AgentBehavior
 			}
 		}
 
-		if(preyDistance <  float.MaxValue)
+		if(preyDistance < float.MaxValue)
 		{
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(preyPosition);
 			this.currentPlan = newAction;
 
 			nextUpdate = Time.realtimeSinceStartup + updateDelay;
-			return;
+			return true;
 		}
 
-		// For now "wander aimlessly" means randomWalkBehavior
-		
-		// pick a random angle in radians and walk in that direction
-		float a = Random.Range(0, 2.0f*Mathf.PI);
-		
-		float distance = 20; // unimportant, won't get that far in the small timesteps allowed.
-		float targetX = distance * Mathf.Cos(a);
-		float targetY = distance * Mathf.Sin(a);
-		
-		newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-		newAction.setTargetPoint(myself.getLocation() + new Vector2(targetX,targetY));
-		
-		this.currentPlan = newAction;
-		
-		nextUpdate = Time.realtimeSinceStartup + updateDelay;
+		return false;
 	}
 }

@@ -14,9 +14,11 @@ public class Agent : MonoBehaviour
 	private AgentBehavior behavior			= new NoopBehavior();
 
 	private Vector2 location				= Vector2.zero;
-	private float direction					= 0;
-	private float fieldOfView				= 0;
-	private float sightRange				= 0;
+	private float direction					= 0.0f;
+	private float fieldOfView				= 0.0f;
+	private float sightRange				= 0.0f;
+
+	private float speedMultiplier			= 1.0f;
 
 	#endregion Agent traits
 	//////////////////////////////////////////////////////////////////
@@ -109,6 +111,16 @@ public class Agent : MonoBehaviour
 	{
 		sightRange = newRange;
 	}
+
+	public float getSpeedMultiplier()
+	{
+		return speedMultiplier;
+	}
+	public void setSpeedMultiplier(float newMult)
+	{
+		speedMultiplier = newMult;
+	}
+
 	#endregion MonoBehaviour methods
 	//////////////////////////////////////////////////////////////////
 }
