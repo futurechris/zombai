@@ -150,6 +150,7 @@ public class WorldMap : MonoBehaviour
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
 			tempGO.transform.parent = agentsGO.transform;
+			tempGO.name = "Living "+i;
 
 			tempPosition = getValidAgentPosition();
 
@@ -175,6 +176,7 @@ public class WorldMap : MonoBehaviour
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
 			tempGO.transform.parent = agentsGO.transform;
+			tempGO.name = "Undead "+i;
 			
 			tempPosition = getValidAgentPosition();
 
@@ -188,6 +190,7 @@ public class WorldMap : MonoBehaviour
 
 			tempFTB = new FallThroughBehavior();
 			tempFTB.addBehavior( new PursueBehavior() );
+			tempFTB.addBehavior( new NecrophageBehavior() );
 			tempFTB.addBehavior( new RandomWalkBehavior() );
 
 			tempAgent.setBehavior(tempFTB);
@@ -200,6 +203,7 @@ public class WorldMap : MonoBehaviour
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
 			tempGO.transform.parent = agentsGO.transform;
+			tempGO.name = "Corpse "+i;
 			
 			tempPosition = getValidAgentPosition();
 			

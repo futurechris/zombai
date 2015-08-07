@@ -4,11 +4,7 @@ using System.Collections.Generic;
 
 public class PursueBehavior : AgentBehavior
 {
-	float updateDelay = 0.5f;
-	float nextUpdate = 0;
-
 	// pursue nearest living agent
-	// otherwise wander aimlessly
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
 		currentPlans.Clear();
@@ -36,7 +32,6 @@ public class PursueBehavior : AgentBehavior
 			newAction.setTargetPoint(preyPosition);
 			this.currentPlans.Add(newAction);
 
-			nextUpdate = Time.realtimeSinceStartup + updateDelay;
 			myself.setMoveInUse(true);
 			return true;
 		}

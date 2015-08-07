@@ -2,42 +2,40 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class FleeBehavior : AgentBehavior
+public class NecrophageBehavior : AgentBehavior
 {
-	// flee from nearest undead
+	// "pursue" nearest corpse
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
 		currentPlans.Clear();
 		Action newAction;
-
-		float enemyDistance = float.MaxValue;
-		Vector2 enemyPosition = Vector2.zero;
+		
+		float preyDistance = float.MaxValue;
+		Vector2 preyPosition = Vector2.zero;
 		float tempDistance = 0.0f;
 		for(int i=0; i<percepts.Count; i++)
 		{
-			if(percepts[i].living == AgentPercept.LivingState.UNDEAD )
+			if(percepts[i].living == AgentPercept.LivingState.DEAD )
 			{
 				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
-				if( tempDistance < enemyDistance)
+				if( tempDistance < preyDistance)
 				{
-					enemyDistance = tempDistance;
-					enemyPosition = percepts[i].locOne;
+					preyDistance = tempDistance;
+					preyPosition = percepts[i].locOne;
 				}
 			}
 		}
 		
-		if(enemyDistance < float.MaxValue && !myself.getMoveInUse())
+		if(preyDistance < float.MaxValue && !myself.getMoveInUse())
 		{
-			Vector2 mirror = myself.getLocation() + (myself.getLocation() - enemyPosition);
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-			newAction.setTargetPoint(mirror);
+			newAction.setTargetPoint(preyPosition);
 			this.currentPlans.Add(newAction);
+			
 			myself.setMoveInUse(true);
-
 			return true;
 		}
-
+		
 		return false;
 	}
-
 }
