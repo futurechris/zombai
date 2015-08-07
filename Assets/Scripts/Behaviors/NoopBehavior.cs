@@ -6,8 +6,12 @@ public class NoopBehavior : AgentBehavior
 {
 	public NoopBehavior()
 	{
-		currentPlan = new Action(Action.ActionType.STAY);
+		currentPlans.Clear();
 	}
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {return true;}
+	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	{
+		currentPlans.Clear();
+		return true;
+	}
 }

@@ -92,6 +92,8 @@ public class WorldMap : MonoBehaviour
 			if(		agent.getIsAlive() == AgentPercept.LivingState.ALIVE
 			   || 	agent.getIsAlive() == AgentPercept.LivingState.UNDEAD)
 			{
+				agent.setLookInUse(false);
+				agent.setMoveInUse(false);
 				agent.getBehavior().updatePlan( getPercepts(agent), 1 );
 			}
 		}
@@ -346,31 +348,34 @@ public class WorldMap : MonoBehaviour
 
 	private void executeAction(Agent agent, float duration)
 	{
-		Action plan = agent.getBehavior().getCurrentPlan();
-		switch(plan.getActionType())
+		List<Action> planList = agent.getBehavior().getCurrentPlans();
+		for(int i=0; i<planList.Count; i++)
 		{
-			case Action.ActionType.STAY:
-				return;
-
-			case Action.ActionType.MOVE_TOWARDS:
-				Vector2 newPoint = agent.getLocation() + (plan.getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
-
-				if(isValidPosition(newPoint))
-				{
-					agent.setLocation(newPoint);
-				}
-
-				return;
-
-			case Action.ActionType.TURN_BY_DEGREES:
-				return;
-
-			case Action.ActionType.TURN_TO_DEGREES:
-				agent.setDirection( plan.getDirection() );
-				return;
-
-			case Action.ActionType.TURN_TOWARDS:
-				return;
+			switch(planList[i].getActionType())
+			{
+				case Action.ActionType.STAY:
+					break;
+					
+				case Action.ActionType.MOVE_TOWARDS:
+					Vector2 newPoint = agent.getLocation() + (planList[i].getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
+					
+					if(isValidPosition(newPoint))
+					{
+						agent.setLocation(newPoint);
+					}
+					
+					break;
+					
+				case Action.ActionType.TURN_BY_DEGREES:
+					break;
+					
+				case Action.ActionType.TURN_TO_DEGREES:
+					agent.setDirection( planList[i].getDirection() );
+					break;
+					
+				case Action.ActionType.TURN_TOWARDS:
+					break;
+			}
 		}
 	}
 

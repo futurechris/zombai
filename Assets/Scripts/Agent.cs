@@ -20,6 +20,10 @@ public class Agent : MonoBehaviour
 
 	private float speedMultiplier			= 1.0f;
 
+	// This is *definitely* going to need iteration. :P
+	private bool moveInUse					= false;
+	private bool lookInUse					= false;
+
 	#endregion Agent traits
 	//////////////////////////////////////////////////////////////////
 
@@ -119,6 +123,24 @@ public class Agent : MonoBehaviour
 	public void setSpeedMultiplier(float newMult)
 	{
 		speedMultiplier = newMult;
+	}
+
+	public bool getMoveInUse()
+	{
+		return moveInUse;
+	}
+	public void setMoveInUse(bool newUseState)
+	{
+		moveInUse = newUseState;
+	}
+
+	public bool getLookInUse()
+	{
+		return lookInUse;
+	}
+	public void setLookInUse(bool newUseState)
+	{
+		lookInUse = newUseState;
 	}
 
 	#endregion MonoBehaviour methods

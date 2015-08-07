@@ -3,17 +3,13 @@ using System.Collections.Generic;
 
 public class AgentBehavior
 {
-	protected Action currentPlan = new Action(); // new Action() defaults to a NOOP ('STAY')
+	protected List<Action> currentPlans = new List<Action>();
 
 	protected Agent myself;
 
-	public Action getCurrentPlan()
+	public List<Action> getCurrentPlans()
 	{
-		if(currentPlan == null)
-		{
-			currentPlan = new Action();
-		}
-		return currentPlan;
+		return currentPlans;
 	}
 
 	public virtual void setAgent(Agent newAgent)
@@ -21,7 +17,11 @@ public class AgentBehavior
 		myself = newAgent;
 	}
 
-	public virtual bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits) {return true;}
+	public virtual bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	{
+		currentPlans.Clear();
+		return true;
+	}
 
 
 }

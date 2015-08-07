@@ -11,6 +11,7 @@ public class PursueBehavior : AgentBehavior
 	// otherwise wander aimlessly
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
+		currentPlans.Clear();
 		Action newAction;
 
 		float preyDistance = float.MaxValue;
@@ -29,13 +30,14 @@ public class PursueBehavior : AgentBehavior
 			}
 		}
 
-		if(preyDistance < float.MaxValue)
+		if(preyDistance < float.MaxValue && !myself.getMoveInUse())
 		{
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(preyPosition);
-			this.currentPlan = newAction;
+			this.currentPlans.Add(newAction);
 
 			nextUpdate = Time.realtimeSinceStartup + updateDelay;
+			myself.setMoveInUse(true);
 			return true;
 		}
 

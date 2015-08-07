@@ -20,6 +20,34 @@ public class Action
 		return actionType;
 	}
 
+	public bool getUsingMove()
+	{
+		switch(actionType)
+		{
+			case ActionType.STAY:
+				return true;
+			case ActionType.MOVE_TOWARDS:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public bool getUsingLook()
+	{
+		switch(actionType)
+		{
+			case ActionType.TURN_BY_DEGREES:
+				return true;
+			case ActionType.TURN_TO_DEGREES:
+				return true;
+			case ActionType.TURN_TOWARDS:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////
 	#region Action parameter settings
 	// Each action will use whichever of these are appropriate
