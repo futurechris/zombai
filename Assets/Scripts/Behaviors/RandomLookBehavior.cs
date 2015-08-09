@@ -10,20 +10,26 @@ public class RandomLookBehavior : AgentBehavior
 
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(nextUpdate > Time.realtimeSinceStartup || myself.getLookInUse())
+		if(myself.getLookInUse())
 		{
 			return false;
 		}
 
-		currentPlans.Clear();
+		// only change the "plan" every so often.
+		if(nextUpdate > Time.realtimeSinceStartup)
+		{
+			return true;
+		}
+
 
 		Action newAction = new Action(Action.ActionType.TURN_TO_DEGREES);
 		newAction.setDirection(Random.Range(-180.0f, 180.0f));
-
+		
+		currentPlans.Clear();
 		currentPlans.Add(newAction);
-		myself.setLookInUse(true);
-
+		
 		nextUpdate += 0.5f + (Random.value * updateDelay);
+
 
 		return true;
 	}

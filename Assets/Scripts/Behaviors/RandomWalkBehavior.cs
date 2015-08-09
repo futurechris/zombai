@@ -9,9 +9,15 @@ public class RandomWalkBehavior : AgentBehavior
 
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(nextUpdate > Time.realtimeSinceStartup || myself.getMoveInUse())
+		if(myself.getMoveInUse())
 		{
 			return false;
+		}
+
+		// only update every so often
+		if(nextUpdate > Time.realtimeSinceStartup)
+		{
+			return true;
 		}
 
 		currentPlans.Clear();
@@ -19,7 +25,7 @@ public class RandomWalkBehavior : AgentBehavior
 		// pick a random angle in radians and walk in that direction
 		float a = Random.Range(0, 2.0f*Mathf.PI);
 
-		float distance = 20; // unimportant, won't get that far in the small timesteps allowed.
+		float distance = 1000;
 		float targetX = distance * Mathf.Cos(a);
 		float targetY = distance * Mathf.Sin(a);
 
@@ -27,9 +33,8 @@ public class RandomWalkBehavior : AgentBehavior
 		newAction.setTargetPoint(myself.getLocation() + new Vector2(targetX,targetY));
 
 		this.currentPlans.Add(newAction);
-		myself.setMoveInUse(true);
 
-		nextUpdate += updateDelay;
+		nextUpdate += 0.5f + (Random.value * updateDelay);
 
 		return true;
 	}

@@ -7,7 +7,11 @@ public class PursueBehavior : AgentBehavior
 	// pursue nearest living agent
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		currentPlans.Clear();
+		if(myself.getMoveInUse())
+		{
+			return false;
+		}
+
 		Action newAction;
 
 		float preyDistance = float.MaxValue;
@@ -30,9 +34,10 @@ public class PursueBehavior : AgentBehavior
 		{
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(preyPosition);
+
+			this.currentPlans.Clear();
 			this.currentPlans.Add(newAction);
 
-			myself.setMoveInUse(true);
 			return true;
 		}
 

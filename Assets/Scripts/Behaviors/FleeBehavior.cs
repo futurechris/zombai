@@ -7,7 +7,11 @@ public class FleeBehavior : AgentBehavior
 	// flee from nearest undead
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		currentPlans.Clear();
+		if(myself.getMoveInUse())
+		{
+			return false;
+		}
+
 		Action newAction;
 
 		float enemyDistance = float.MaxValue;
@@ -31,8 +35,9 @@ public class FleeBehavior : AgentBehavior
 			Vector2 mirror = myself.getLocation() + (myself.getLocation() - enemyPosition);
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(mirror);
+
+			this.currentPlans.Clear();
 			this.currentPlans.Add(newAction);
-			myself.setMoveInUse(true);
 
 			return true;
 		}

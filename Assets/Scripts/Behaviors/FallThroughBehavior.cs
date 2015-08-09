@@ -44,10 +44,13 @@ public class FallThroughBehavior : AgentBehavior
 					currentPlans.Clear();
 					planCleared = true;
 				}
+
 				List<Action> tempPlans = behaviorList[i].getCurrentPlans();
 				for(int planIdx=0; planIdx<tempPlans.Count; planIdx++)
 				{
 					currentPlans.Add(tempPlans[planIdx]);
+					myself.setLookInUse(myself.getLookInUse() || tempPlans[planIdx].getUsingLook());
+					myself.setMoveInUse(myself.getMoveInUse() || tempPlans[planIdx].getUsingMove());
 				}
 			}
 		}

@@ -7,7 +7,6 @@ public class NecrophageBehavior : AgentBehavior
 	// "pursue" nearest corpse
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		currentPlans.Clear();
 		Action newAction;
 		
 		float preyDistance = float.MaxValue;
@@ -30,6 +29,8 @@ public class NecrophageBehavior : AgentBehavior
 		{
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(preyPosition);
+
+			currentPlans.Clear();
 			this.currentPlans.Add(newAction);
 			
 			myself.setMoveInUse(true);
