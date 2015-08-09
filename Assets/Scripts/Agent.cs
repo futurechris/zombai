@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class Agent : MonoBehaviour
 {
 	public SpriteRenderer agentSprite;
+	public Image fovImage;
 
 	//////////////////////////////////////////////////////////////////
 	#region Agent traits
@@ -32,6 +34,7 @@ public class Agent : MonoBehaviour
 	
 	void Start ()
 	{
+		recalculateFOVImage();
 	}
 	
 	void Update ()
@@ -39,6 +42,26 @@ public class Agent : MonoBehaviour
 	}
 
 	#endregion MonoBehaviour methods
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Helpers
+
+	private void recalculateFOVImage()
+	{
+		// For now, just immediately setting this. Later would be nice to smooth the transition.
+		// That goes for the actual vision cone as well - instant turning is a little strange.
+
+		// The prefab for agents sets the 'fill origin' as being to the right. Fill is clockwise.
+		// % to fill is easy, just the percentage of a circle represented by fieldOfView.
+		fovImage.fillAmount = fieldOfView / 360.0f;
+
+		// angle then is direction-half that?
+		fovImage.rectTransform.rotation = Quaternion.identity; // reset rotation
+		fovImage.rectTransform.Rotate(0.0f, 0.0f, (direction + (fieldOfView/2.0f)));
+	}
+
+	#endregion Helpers
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
@@ -96,6 +119,7 @@ public class Agent : MonoBehaviour
 	public void setDirection(float newDirection)
 	{
 		direction = newDirection;
+		recalculateFOVImage();
 	}
 
 	public float getFieldOfView()
@@ -105,6 +129,7 @@ public class Agent : MonoBehaviour
 	public void setFieldOfView(float newFieldOfView)
 	{
 		fieldOfView = newFieldOfView;
+		recalculateFOVImage();
 	}
 
 	public float getSightRange()

@@ -68,11 +68,11 @@ public class Action
 		// clean mod
 		if(direction < 0)
 		{
-			direction += 2.0f*Mathf.PI;
+			direction += 360.0f;
 		}
-		if(direction >= 2.0f*Mathf.PI)
+		if(direction >= 360.0f)
 		{
-			direction -= 2.0f*Mathf.PI;
+			direction -= 360.0f;
 		}
 	}
 

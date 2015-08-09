@@ -159,13 +159,14 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
 			tempAgent.setSightRange(36.0f);
-			tempAgent.setFieldOfView(360.0f); // roughly full range of vision
+			tempAgent.setFieldOfView(180.0f); // roughly full range of vision
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 			tempAgent.setSpeedMultiplier(1.15f);
 
 			tempFTB = new FallThroughBehavior();
 			tempFTB.addBehavior( new FleeBehavior() );
 			tempFTB.addBehavior( new RandomWalkBehavior() );
+			tempFTB.addBehavior( new RandomLookBehavior() );
 
 			tempAgent.setBehavior(tempFTB);
 
@@ -185,13 +186,14 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
 			tempAgent.setSightRange(25.0f);
-			tempAgent.setFieldOfView(360.0f); // roughly human binocular vision
+			tempAgent.setFieldOfView(90.0f);
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 
 			tempFTB = new FallThroughBehavior();
 			tempFTB.addBehavior( new PursueBehavior() );
 			tempFTB.addBehavior( new NecrophageBehavior() );
 			tempFTB.addBehavior( new RandomWalkBehavior() );
+			tempFTB.addBehavior( new RandomLookBehavior() );
 
 			tempAgent.setBehavior(tempFTB);
 
@@ -212,7 +214,7 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 			tempAgent.setIsAlive(AgentPercept.LivingState.DEAD);
 			tempAgent.setSightRange(0.0f);
-			tempAgent.setFieldOfView(0.0f); // roughly full range of vision
+			tempAgent.setFieldOfView(0.0f);
 			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
 			
 			tempAgentBehavior = new NoopBehavior();
