@@ -57,6 +57,7 @@ public class WorldMap : MonoBehaviour
 		initializeWorld(1024,768,1);
 		instantiateWorld();
 		populateWorld(10,10,200);
+//		populateTestWorld();
 	}
 
 	void Update ()
@@ -137,7 +138,47 @@ public class WorldMap : MonoBehaviour
 			structures.Add( new Rect(xPos,yPos, xDim,yDim) );
 		}
 	}
-	
+
+	private void populateTestWorld()
+	{
+		GameObject humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
+		humanGO.transform.parent = agentsGO.transform;
+		humanGO.name = "Living 1";
+
+		Agent humanAgent = humanGO.GetComponent<Agent>();
+		humanAgent.setAgentColor(Color.green);
+		humanAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f));
+		humanAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
+		humanAgent.setSightRange(50.0f);
+		humanAgent.setFieldOfView(120.0f);
+		humanAgent.setDirection(0.0f);
+		humanAgent.setSpeedMultiplier(1.15f);
+
+		FallThroughBehavior ftb = new FallThroughBehavior();
+		ftb.addBehavior( new NoopBehavior());
+		humanAgent.setBehavior( ftb );
+		agents.Add(humanAgent);
+
+		GameObject zombieGO = GameObject.Instantiate(agentPrefab) as GameObject;
+		zombieGO.transform.parent = agentsGO.transform;
+		zombieGO.name = "Undead 1";
+
+		Agent zombieAgent = zombieGO.GetComponent<Agent>();
+		zombieAgent.setAgentColor(Color.magenta);
+		zombieAgent.setLocation(new Vector2(worldWidth/2.0f + 100.0f, worldHeight/2.0f));
+		zombieAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
+		zombieAgent.setSightRange(100.0f);
+		zombieAgent.setFieldOfView(360.0f);
+		zombieAgent.setDirection(0.0f);
+//		zombieAgent.setSpeedMultiplier(1.0f);
+		
+		FallThroughBehavior zombieFTB = new FallThroughBehavior();
+		zombieFTB.addBehavior( new NoopBehavior());
+		zombieAgent.setBehavior( zombieFTB );
+		agents.Add( zombieAgent );
+
+	}
+
 	// Create agents, give them behaviors and locations, turn them loose.
 	private void populateWorld(int numLiving, int numCorpses, int numUndead)
 	{

@@ -138,7 +138,9 @@ public class Agent : MonoBehaviour
 	}
 	public void setSightRange(float newRange)
 	{
+		float multiplier = newRange/16f; // magic number, but accurate.
 		sightRange = newRange;
+		fovImage.rectTransform.localScale = new Vector3(multiplier, multiplier, 1.0f);
 	}
 
 	public float getSpeedMultiplier()
