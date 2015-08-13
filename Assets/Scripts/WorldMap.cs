@@ -54,7 +54,7 @@ public class WorldMap : MonoBehaviour
 		targetFramerate = _targetFramerate;
 
 		// hard-coding size for now - camera in scene is set to work for this size as well.
-		initializeWorld(1024,768,1);
+		initializeWorld(1024,768,100);
 		instantiateWorld();
 		populateWorld(10,10,200);
 //		populateTestWorld();
@@ -155,7 +155,7 @@ public class WorldMap : MonoBehaviour
 		humanAgent.setSpeedMultiplier(1.15f);
 
 		FallThroughBehavior ftb = new FallThroughBehavior();
-		ftb.addBehavior( new NoopBehavior());
+		ftb.addBehavior( new WanderBehavior());
 		humanAgent.setBehavior( ftb );
 		agents.Add(humanAgent);
 
@@ -206,7 +206,7 @@ public class WorldMap : MonoBehaviour
 
 			tempFTB = new FallThroughBehavior();
 			tempFTB.addBehavior( new FleeBehavior() );
-			tempFTB.addBehavior( new RandomWalkBehavior() );
+			tempFTB.addBehavior( new WanderBehavior() );
 			tempFTB.addBehavior( new RandomLookBehavior() );
 
 			tempAgent.setBehavior(tempFTB);
@@ -233,7 +233,7 @@ public class WorldMap : MonoBehaviour
 			tempFTB = new FallThroughBehavior();
 			tempFTB.addBehavior( new PursueBehavior() );
 			tempFTB.addBehavior( new NecrophageBehavior() );
-			tempFTB.addBehavior( new RandomWalkBehavior() );
+			tempFTB.addBehavior( new WanderBehavior() );
 			tempFTB.addBehavior( new RandomLookBehavior() );
 
 			tempAgent.setBehavior(tempFTB);
