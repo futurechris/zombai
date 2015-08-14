@@ -302,7 +302,7 @@ public class WorldMap : MonoBehaviour
 		}
 		return true;
 	}
-
+	
 	private void instantiateWorld()
 	{
 		// Structures
@@ -352,7 +352,7 @@ public class WorldMap : MonoBehaviour
 		List<AgentPercept> structureList = null;
 		for(int i=0; i<structures.Count; i++)
 		{
-			structureList = canPerceiveStructure(agent, structures[i]);
+			structureList = perceiveStructure(agent, structures[i]);
 			if(structureList != null)
 			{
 				apList.AddRange(structureList);
@@ -387,7 +387,7 @@ public class WorldMap : MonoBehaviour
 		return false;
 	}
 
-	private List<AgentPercept> canPerceiveStructure(Agent who, Rect what)
+	private List<AgentPercept> perceiveStructure(Agent who, Rect what)
 	{
 		// TODO: Calculate chunks of walls that are visible, return those.
 		return null;
@@ -404,26 +404,56 @@ public class WorldMap : MonoBehaviour
 					break;
 					
 				case Action.ActionType.MOVE_TOWARDS:
-					Vector2 newPoint = agent.getLocation() + (planList[i].getTargetPoint() - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
-					
-					if(isValidPosition(newPoint))
-					{
-						agent.setLocation(newPoint);
-					}
-					
+					moveAgentTowards( agent, planList[i].getTargetPoint(), duration);
 					break;
 					
 				case Action.ActionType.TURN_BY_DEGREES:
+					turnAgentBy( agent, planList[i].getDirection());
 					break;
 					
 				case Action.ActionType.TURN_TO_DEGREES:
-					agent.setDirection( planList[i].getDirection() );
+					turnAgentTo( agent, planList[i].getDirection());
 					break;
 					
 				case Action.ActionType.TURN_TOWARDS:
+					turnAgentTowards( agent, planList[i].getTargetPoint());
 					break;
 			}
 		}
+	}
+
+	// attempt to move the agent as far as possible towards target,
+	// given a duration of movement.
+	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
+	{
+		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
+
+		if(isValidPosition(newPoint))
+		{
+			agent.setLocation(newPoint);
+		}
+		else
+		{
+			// partial movement & wall-sliding go here
+		}
+	}
+
+	private void turnAgentBy(Agent agent, float degrees)
+	{
+		agent.setDirection( agent.getDirection() + degrees );
+	}
+
+	private void turnAgentTo(Agent agent, float angle)
+	{
+		agent.setDirection( angle );
+	}
+
+	private void turnAgentTowards(Agent agent, Vector2 point)
+	{
+		Vector2 delta = point - agent.getLocation();
+		float angle = Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
+
+		turnAgentTo( agent, angle );
 	}
 
 	#endregion Agent-World Interactions
