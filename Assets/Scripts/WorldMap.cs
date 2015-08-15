@@ -435,6 +435,21 @@ public class WorldMap : MonoBehaviour
 		else
 		{
 			// partial movement & wall-sliding go here
+			Vector2 firstStop = nearestDirect(agent.getLocation(), newPoint, 0.125f);
+
+			// in 2D should only have one valid dimension here.
+			// and technically, could get even more accurate by calling nearestDirect again.
+			// TODO: Evaluate whether it's worth using nearestDirect here.
+			Vector2 xTarget = new Vector2(newPoint.x, firstStop.y);
+			Vector2 yTarget = new Vector2(firstStop.x, newPoint.y);
+			if(isValidPosition(xTarget))
+			{
+				agent.setLocation(xTarget);
+			}
+			else if(isValidPosition(yTarget))
+			{
+				agent.setLocation(yTarget);
+			}
 		}
 	}
 
@@ -454,6 +469,24 @@ public class WorldMap : MonoBehaviour
 		float angle = Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
 
 		turnAgentTo( agent, angle );
+	}
+
+	private Vector2 nearestDirect(Vector2 start, Vector2 stop, float incrementPercent)
+	{
+		// technically these won't line up well, especially if incrementPercent
+		// is something like 0.1, which doesn't play well with binary.
+		// but Vector2.Lerp clamps [0,1] so at worst it's an extra iteration.
+		Vector2 bestPoint = start;
+		Vector2 tempPoint = start;
+		for(float t = 0; t<=1.00001f; t+=incrementPercent)
+		{
+			tempPoint = Vector2.Lerp(start,stop,t);
+			if(isValidPosition(tempPoint))
+			{
+				bestPoint = tempPoint;
+			}
+		}
+		return bestPoint;
 	}
 
 	#endregion Agent-World Interactions
