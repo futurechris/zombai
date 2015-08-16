@@ -43,7 +43,11 @@ public class WorldMap : MonoBehaviour
 
 	private float worldWidth = 0;
 	private float worldHeight = 0;
-	
+
+	private int livingCount = 0;
+	private int undeadCount = 0;
+	private int corpseCount = 0;
+
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
 
@@ -98,6 +102,29 @@ public class WorldMap : MonoBehaviour
 				agent.setLookInUse(false);
 				agent.setMoveInUse(false);
 				agent.getBehavior().updatePlan( getPercepts(agent), 1 );
+			}
+		}
+
+		// 5. Lazy cache-oid bookkeeping
+		updateAgentCounts();
+	}
+
+	private void updateAgentCounts()
+	{
+		livingCount = undeadCount = corpseCount = 0;
+		foreach(Agent ag in agents)
+		{
+			if(ag.getIsAlive() == AgentPercept.LivingState.ALIVE)
+			{
+				livingCount++;
+			}
+			else if(ag.getIsAlive() == AgentPercept.LivingState.UNDEAD)
+			{
+				undeadCount++;
+			}
+			else if(ag.getIsAlive() == AgentPercept.LivingState.DEAD)
+			{
+				corpseCount++;
 			}
 		}
 	}
@@ -464,5 +491,26 @@ public class WorldMap : MonoBehaviour
 	}
 
 	#endregion Agent-World Interactions
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Getters/Setters
+
+	public int getLivingCount()
+	{
+		return livingCount;
+	}
+
+	public int getUndeadCount()
+	{
+		return undeadCount;
+	}
+
+	public int getCorpseCount()
+	{
+		return corpseCount;
+	}
+
+	#endregion Getters/Setters
 	//////////////////////////////////////////////////////////////////
 }
