@@ -3,12 +3,14 @@ using System.Collections;
 
 public class Action
 {
-	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_BY_DEGREES, TURN_TOWARDS };
+	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_BY_DEGREES, TURN_TOWARDS,
+							 CONVERT };
 
 	private ActionType actionType = ActionType.STAY;
 
 	private Vector2 targetPoint = Vector2.zero;
 	private float   direction	= 0.0f;
+	private Agent	targetAgent = null;
 
 	public Action(ActionType newActionType=ActionType.STAY)
 	{
@@ -79,6 +81,16 @@ public class Action
 	public float getDirection()
 	{
 		return direction;
+	}
+
+	public void setTargetAgent(Agent newTarget)
+	{
+		targetAgent = newTarget;
+	}
+
+	public Agent getTargetAgent()
+	{
+		return targetAgent;
 	}
 
 	#endregion Action parameter settings

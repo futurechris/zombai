@@ -33,6 +33,7 @@ public class WorldMap : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
 
+	private ActionArbiter arbiter;
 	private List<Agent> agents = new List<Agent>();
 	private List<int> workUnits = new List<int>();
 
@@ -51,6 +52,7 @@ public class WorldMap : MonoBehaviour
 
 	void Start ()
 	{
+		arbiter = new ActionArbiter();
 		targetFramerate = _targetFramerate;
 
 		// hard-coding size for now - camera in scene is set to work for this size as well.
@@ -82,8 +84,8 @@ public class WorldMap : MonoBehaviour
 			executeAction(agent, storedDeltaTime);
 		}
 
-		// 3. Update any remaining rendery bits.
-		// ...
+		// 3. Action arbiter determines outcome of opposed actions
+		arbiter.resolveActions();
 
 		// 4. Allocate time to agents to process percepts and update plans
 		foreach(Agent agent in agents)
@@ -148,7 +150,7 @@ public class WorldMap : MonoBehaviour
 		Agent humanAgent = humanGO.GetComponent<Agent>();
 		humanAgent.setAgentColor(Color.green);
 		humanAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f));
-		humanAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
+		humanAgent.configureAs(Agent.AgentType.HUMAN);
 		humanAgent.setSightRange(50.0f);
 		humanAgent.setFieldOfView(120.0f);
 		humanAgent.setDirection(0.0f);
@@ -159,6 +161,7 @@ public class WorldMap : MonoBehaviour
 		humanAgent.setBehavior( ftb );
 		agents.Add(humanAgent);
 
+
 		GameObject zombieGO = GameObject.Instantiate(agentPrefab) as GameObject;
 		zombieGO.transform.parent = agentsGO.transform;
 		zombieGO.name = "Undead 1";
@@ -166,11 +169,10 @@ public class WorldMap : MonoBehaviour
 		Agent zombieAgent = zombieGO.GetComponent<Agent>();
 		zombieAgent.setAgentColor(Color.magenta);
 		zombieAgent.setLocation(new Vector2(worldWidth/2.0f + 100.0f, worldHeight/2.0f));
-		zombieAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
+		zombieAgent.configureAs(Agent.AgentType.ZOMBIE);
 		zombieAgent.setSightRange(100.0f);
 		zombieAgent.setFieldOfView(360.0f);
 		zombieAgent.setDirection(0.0f);
-//		zombieAgent.setSpeedMultiplier(1.0f);
 		
 		FallThroughBehavior zombieFTB = new FallThroughBehavior();
 		zombieFTB.addBehavior( new NoopBehavior());
@@ -196,20 +198,8 @@ public class WorldMap : MonoBehaviour
 			tempPosition = getValidAgentPosition();
 
 			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.setAgentColor(Color.green);
+			tempAgent.configureAs(Agent.AgentType.HUMAN);
 			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(AgentPercept.LivingState.ALIVE);
-			tempAgent.setSightRange(36.0f);
-			tempAgent.setFieldOfView(180.0f); // roughly full range of vision
-			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
-			tempAgent.setSpeedMultiplier(1.15f);
-
-			tempFTB = new FallThroughBehavior();
-			tempFTB.addBehavior( new FleeBehavior() );
-			tempFTB.addBehavior( new WanderBehavior() );
-			tempFTB.addBehavior( new RandomLookBehavior() );
-
-			tempAgent.setBehavior(tempFTB);
 
 			agents.Add(tempAgent);
 		}
@@ -223,25 +213,12 @@ public class WorldMap : MonoBehaviour
 			tempPosition = getValidAgentPosition();
 
 			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.setAgentColor(Color.magenta);
+			tempAgent.configureAs(Agent.AgentType.ZOMBIE);
 			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(AgentPercept.LivingState.UNDEAD);
-			tempAgent.setSightRange(25.0f);
-			tempAgent.setFieldOfView(90.0f);
-			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
-
-			tempFTB = new FallThroughBehavior();
-			tempFTB.addBehavior( new PursueBehavior() );
-			tempFTB.addBehavior( new NecrophageBehavior() );
-			tempFTB.addBehavior( new WanderBehavior() );
-			tempFTB.addBehavior( new RandomLookBehavior() );
-
-			tempAgent.setBehavior(tempFTB);
 
 			agents.Add(tempAgent);
 		}
 
-		
 		for(int i=0; i<numCorpses; i++)
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
@@ -251,16 +228,9 @@ public class WorldMap : MonoBehaviour
 			tempPosition = getValidAgentPosition();
 			
 			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.setAgentColor(Color.cyan);
+			tempAgent.configureAs(Agent.AgentType.CORPSE);
 			tempAgent.setLocation(tempPosition);
-			tempAgent.setIsAlive(AgentPercept.LivingState.DEAD);
-			tempAgent.setSightRange(0.0f);
-			tempAgent.setFieldOfView(0.0f);
-			tempAgent.setDirection(Random.Range(-180.0f, 180.0f));
-			
-			tempAgentBehavior = new NoopBehavior();
-			tempAgent.setBehavior(tempAgentBehavior);
-			
+
 			agents.Add(tempAgent);
 		}
 	}
@@ -417,6 +387,10 @@ public class WorldMap : MonoBehaviour
 					
 				case Action.ActionType.TURN_TOWARDS:
 					turnAgentTowards( agent, planList[i].getTargetPoint());
+					break;
+
+				case Action.ActionType.CONVERT:
+					arbiter.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
 					break;
 			}
 		}

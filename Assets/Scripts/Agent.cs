@@ -4,16 +4,23 @@ using System.Collections;
 
 public class Agent : MonoBehaviour
 {
+	// Regularly used agent types to speed up initialization
+	// and enable conversion between agent types
+	public enum AgentType { CUSTOM, HUMAN, ZOMBIE, CORPSE };
+
 	public SpriteRenderer agentSprite;
 	public Image fovImage;
 
 	//////////////////////////////////////////////////////////////////
 	#region Agent traits
-
 	private	System.Guid guid				= System.Guid.NewGuid();
-	private Color agentColor 				= Color.cyan;
+	private bool needsInitialization		= true;
+
+	// Several of these wouldn't "const" correctly, so for now non-DRYly
+	// duplicating the 'defaults' down in configureDefault()
 	private AgentPercept.LivingState living	= AgentPercept.LivingState.ALIVE;
 	private AgentBehavior behavior			= new NoopBehavior();
+	private Color agentColor				= Color.cyan;
 
 	private Vector2 location				= Vector2.zero;
 	private float direction					= 0.0f;
@@ -34,6 +41,12 @@ public class Agent : MonoBehaviour
 	
 	void Start ()
 	{
+		if(needsInitialization)
+		{
+			configureDefault();
+			needsInitialization = false;
+		}
+
 		recalculateFOVImage();
 	}
 	
@@ -42,6 +55,122 @@ public class Agent : MonoBehaviour
 	}
 
 	#endregion MonoBehaviour methods
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Agent type definitions
+
+	// since we don't seem to have defaults in whatever C# I'm getting via Mono...
+	public void configureAs(AgentType newType)
+	{
+		configureAs(newType, false);
+	}
+
+	public void configureAs(AgentType newType, bool resetFirst)
+	{
+		if(resetFirst)
+		{
+			configureDefault();
+		}
+
+		needsInitialization = false;
+
+		switch(newType)
+		{
+			case AgentType.CUSTOM:
+				configureAsCustom();
+				break;
+			case AgentType.CORPSE:
+				configureAsCorpse();
+				break;
+			case AgentType.HUMAN:
+				configureAsHuman();
+				break;
+			case AgentType.ZOMBIE:
+				configureAsZombie();
+				break;
+		}
+	}
+
+	private void configureAsCustom()
+	{
+		// for now, nothing?
+	}
+
+	private void configureAsCorpse()
+	{
+		setAgentColor(Color.cyan);
+		setIsAlive(AgentPercept.LivingState.DEAD);
+		setSightRange(0.0f);
+		setFieldOfView(0.0f);
+		setDirection(Random.Range(-180.0f, 180.0f));
+
+		setBehavior(new NoopBehavior());
+	}
+
+	private void configureAsHuman()
+	{
+		setAgentColor(Color.green);
+		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setSightRange(36.0f);
+		setFieldOfView(180.0f); // roughly full range of vision
+		setDirection(Random.Range(-180.0f, 180.0f));
+		setSpeedMultiplier(1.15f);
+		
+		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new FleeBehavior() );
+		tempFTB.addBehavior( new WanderBehavior() );
+		tempFTB.addBehavior( new RandomLookBehavior() );
+		
+		setBehavior(tempFTB);
+	}
+
+	private void configureAsZombie()
+	{
+		setAgentColor(Color.magenta);
+		setIsAlive(AgentPercept.LivingState.UNDEAD);
+		setSightRange(25.0f);
+		setFieldOfView(90.0f);
+		setDirection(Random.Range(-180.0f, 180.0f));
+		setSpeedMultiplier(1.0f);
+		
+		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new PursueBehavior() );
+		tempFTB.addBehavior( new NecrophageBehavior() );
+		tempFTB.addBehavior( new WanderBehavior() );
+		tempFTB.addBehavior( new RandomLookBehavior() );
+
+		
+		setBehavior(tempFTB);
+	}
+
+	private void configureDefault()
+	{
+		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setBehavior(new NoopBehavior());
+		setAgentColor(Color.cyan);
+
+		setDirection(0.0f);
+		setFieldOfView(0.0f);
+		setSightRange(0.0f);
+		
+		setSpeedMultiplier(1.0f);
+
+		setMoveInUse(false);
+		setLookInUse(false);
+
+		// Not sure if this one should be part of defaults...
+		// The intended use of configureDefault() is to remove agent
+		// customizations that may no longer apply. E.g., if some human is
+		// "well-rested" when they die, they might have a higher speed multiplier.
+		// That doesn't necessarily carry through zombification, so we would want
+		// to remove it.
+		// But that doesn't mean they need to be teleported to Vector2.zero.
+//		setLocation(Vector2.zero);
+
+	}
+
+	#endregion Agent type definitions
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
