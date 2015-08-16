@@ -32,8 +32,7 @@ public class WorldMap : MonoBehaviour
 
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
-
-	private ActionArbiter arbiter;
+	
 	private List<Agent> agents = new List<Agent>();
 	private List<int> workUnits = new List<int>();
 
@@ -56,13 +55,12 @@ public class WorldMap : MonoBehaviour
 
 	void Start ()
 	{
-		arbiter = new ActionArbiter();
 		targetFramerate = _targetFramerate;
 
 		// hard-coding size for now - camera in scene is set to work for this size as well.
 		initializeWorld(1024,768,100);
 		instantiateWorld();
-		populateWorld(10,10,200);
+		populateWorld(400,10,10);
 //		populateTestWorld();
 	}
 
@@ -89,7 +87,7 @@ public class WorldMap : MonoBehaviour
 		}
 
 		// 3. Action arbiter determines outcome of opposed actions
-		arbiter.resolveActions();
+		ActionArbiter.Instance.resolveActions();
 
 		// 4. Allocate time to agents to process percepts and update plans
 		foreach(Agent agent in agents)
@@ -341,6 +339,11 @@ public class WorldMap : MonoBehaviour
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
 				tempPercept.locOne 	= agents[i].getLocation();
 				tempPercept.living 	= agents[i].getIsAlive();
+
+				// TODO: Agent object should not be part of percept, fix!
+				// See AgentPercept.perceivedAgent for more.
+				tempPercept.perceivedAgent = agents[i];
+
 				apList.Add(tempPercept);
 				tempPercept 		= null;
 			}
@@ -417,7 +420,7 @@ public class WorldMap : MonoBehaviour
 					break;
 
 				case Action.ActionType.CONVERT:
-					arbiter.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
+					ActionArbiter.Instance.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
 					break;
 			}
 		}

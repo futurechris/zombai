@@ -4,6 +4,21 @@ using System.Collections.Generic;
 
 public class ActionArbiter {
 
+	private static ActionArbiter _instance;
+
+	private ActionArbiter(){}
+
+	public static ActionArbiter Instance
+	{
+		get
+		{
+			if(_instance == null)
+				_instance = new ActionArbiter();
+			
+			return _instance;
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////
 	#region Arbitration parameters
 
@@ -36,6 +51,11 @@ public class ActionArbiter {
 	public void requestAction(Agent initiator, Agent target, ActionType verb)
 	{
 		queuedActions.Add(new ActionParameters(initiator,target,verb));
+	}
+
+	public float getConvertDistance()
+	{
+		return convertDistance;
 	}
 
 	#endregion Interface

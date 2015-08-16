@@ -130,11 +130,12 @@ public class Agent : MonoBehaviour
 		setAgentColor(Color.magenta);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
 		setSightRange(25.0f);
-		setFieldOfView(90.0f);
+		setFieldOfView(120.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new ZombifyBehavior() );
 		tempFTB.addBehavior( new PursueBehavior() );
 		tempFTB.addBehavior( new NecrophageBehavior() );
 		tempFTB.addBehavior( new WanderBehavior() );
