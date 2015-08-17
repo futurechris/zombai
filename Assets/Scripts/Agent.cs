@@ -249,6 +249,14 @@ public class Agent : MonoBehaviour
 	public void setDirection(float newDirection)
 	{
 		direction = newDirection;
+		if(direction < 0)
+		{
+			direction += 360;
+		}
+		if(direction >= 360)
+		{
+			direction -= 360;
+		}
 		recalculateFOVImage();
 	}
 

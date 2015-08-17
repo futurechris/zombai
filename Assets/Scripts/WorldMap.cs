@@ -21,6 +21,9 @@ public class WorldMap : MonoBehaviour
 	// how many pixels should be moved per second for an agent on the go.
 	private float moveSpeed = 10.0f;
 
+	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
+	private float perfectVisionRange = 2.0f;
+
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
 
@@ -174,17 +177,38 @@ public class WorldMap : MonoBehaviour
 
 		Agent humanAgent = humanGO.GetComponent<Agent>();
 		humanAgent.setAgentColor(Color.green);
-		humanAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f));
+		humanAgent.setLocation(new Vector2(worldWidth/2.0f + 40.0f, worldHeight/2.0f + -40.0f));
 		humanAgent.configureAs(Agent.AgentType.HUMAN);
 		humanAgent.setSightRange(50.0f);
-		humanAgent.setFieldOfView(120.0f);
+		humanAgent.setFieldOfView(90.0f);
 		humanAgent.setDirection(0.0f);
 		humanAgent.setSpeedMultiplier(1.15f);
 
 		FallThroughBehavior ftb = new FallThroughBehavior();
-		ftb.addBehavior( new WanderBehavior());
+		ftb.addBehavior( new NoopBehavior());
 		humanAgent.setBehavior( ftb );
 		agents.Add(humanAgent);
+
+		humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
+		humanGO.transform.parent = agentsGO.transform;
+		humanGO.name = "Living 2";
+
+		humanAgent = humanGO.GetComponent<Agent>();
+		humanAgent.setAgentColor(Color.green);
+//		humanAgent.setLocation(new Vector2(worldWidth/2.0f + 20f, worldHeight/2.0f + -34.64101616f)); // 30 degrees
+		humanAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f-40.0f));
+		humanAgent.configureAs(Agent.AgentType.HUMAN);
+		humanAgent.setSightRange(50.0f);
+		humanAgent.setFieldOfView(90.0f);
+		humanAgent.setDirection(0.0f);
+		humanAgent.setSpeedMultiplier(1.15f);
+		
+		ftb = new FallThroughBehavior();
+		ftb.addBehavior( new NoopBehavior());
+		humanAgent.setBehavior( ftb );
+		agents.Add(humanAgent);
+
+
 
 
 		GameObject zombieGO = GameObject.Instantiate(agentPrefab) as GameObject;
@@ -193,15 +217,24 @@ public class WorldMap : MonoBehaviour
 
 		Agent zombieAgent = zombieGO.GetComponent<Agent>();
 		zombieAgent.setAgentColor(Color.magenta);
-		zombieAgent.setLocation(new Vector2(worldWidth/2.0f + 100.0f, worldHeight/2.0f));
+		zombieAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f));
 		zombieAgent.configureAs(Agent.AgentType.ZOMBIE);
 		zombieAgent.setSightRange(100.0f);
-		zombieAgent.setFieldOfView(360.0f);
+		zombieAgent.setFieldOfView(120.0f);
 		zombieAgent.setDirection(0.0f);
+
+		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new ZombifyBehavior() );
+		tempFTB.addBehavior( new PursueBehavior() );
+		tempFTB.addBehavior( new NecrophageBehavior() );
+		tempFTB.addBehavior( new WanderBehavior() );
+		tempFTB.addBehavior( new RandomLookBehavior() );
+		zombieAgent.setBehavior(tempFTB);
 		
-		FallThroughBehavior zombieFTB = new FallThroughBehavior();
-		zombieFTB.addBehavior( new NoopBehavior());
-		zombieAgent.setBehavior( zombieFTB );
+//		FallThroughBehavior zombieFTB = new FallThroughBehavior();
+//		zombieFTB.addBehavior( new NoopBehavior());
+//		zombieAgent.setBehavior( zombieFTB );
+
 		agents.Add( zombieAgent );
 
 	}
@@ -374,9 +407,15 @@ public class WorldMap : MonoBehaviour
 			return false;
 		}
 
+		// short-range hack
+		if( delta.magnitude < perfectVisionRange)
+		{
+			return true;
+		}
+
 		// second: calculate angle between who and where, compare to
 		//		   agent's facing, see if it's within FOV
-		float whoToWhereAngle = Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
+		float whoToWhereAngle = 90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
 		float shortest = Mathf.Abs(Mathf.DeltaAngle(whoToWhereAngle, who.getDirection()));
 
 		if(shortest <= (who.getFieldOfView()/2.0f))
@@ -469,8 +508,8 @@ public class WorldMap : MonoBehaviour
 
 	private void turnAgentTowards(Agent agent, Vector2 point)
 	{
-		Vector2 delta = point - agent.getLocation();
-		float angle = Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
+		Vector2 delta = point - agent.getLocation()/* - point*/;
+		float angle = (90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y));
 
 		turnAgentTo( agent, angle );
 	}
