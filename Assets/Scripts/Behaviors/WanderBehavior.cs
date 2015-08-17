@@ -21,7 +21,7 @@ public class WanderBehavior : AgentBehavior
 		}
 		
 		// only update every so often
-		if(nextUpdate > Time.realtimeSinceStartup)
+		if(nextUpdate > Time.time)
 		{
 			return true;
 		}
@@ -29,7 +29,7 @@ public class WanderBehavior : AgentBehavior
 		currentPlans.Clear();
 
 		float a = wanderDirection;
-		if(nextReplot <= Time.realtimeSinceStartup)
+		if(nextReplot <= Time.time)
 		{
 			wanderDirection = Random.Range(0, 2.0f*Mathf.PI);
 			nextReplot += replotDelay;

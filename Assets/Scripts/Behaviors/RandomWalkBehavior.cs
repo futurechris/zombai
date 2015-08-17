@@ -15,7 +15,7 @@ public class RandomWalkBehavior : AgentBehavior
 		}
 
 		// only update every so often
-		if(nextUpdate > Time.realtimeSinceStartup)
+		if(nextUpdate > Time.time)
 		{
 			return true;
 		}

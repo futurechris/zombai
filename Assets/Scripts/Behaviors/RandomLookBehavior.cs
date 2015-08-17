@@ -16,7 +16,7 @@ public class RandomLookBehavior : AgentBehavior
 		}
 
 		// only change the "plan" every so often.
-		if(nextUpdate > Time.realtimeSinceStartup)
+		if(nextUpdate > Time.time)
 		{
 			return true;
 		}
@@ -28,7 +28,7 @@ public class RandomLookBehavior : AgentBehavior
 		currentPlans.Clear();
 		currentPlans.Add(newAction);
 		
-		nextUpdate += 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
 
 
 		return true;

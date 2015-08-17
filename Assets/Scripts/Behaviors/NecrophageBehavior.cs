@@ -7,8 +7,9 @@ public class NecrophageBehavior : AgentBehavior
 	// "pursue" nearest corpse
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		Action newAction;
-		
+		Action newMoveAction;
+		Action newLookAction;
+
 		float preyDistance = float.MaxValue;
 		Vector2 preyPosition = Vector2.zero;
 		float tempDistance = 0.0f;
@@ -27,16 +28,18 @@ public class NecrophageBehavior : AgentBehavior
 		
 		if(preyDistance < float.MaxValue && !myself.getMoveInUse())
 		{
-			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-			newAction.setTargetPoint(preyPosition);
+			newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
+			newMoveAction.setTargetPoint(preyPosition);
+			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
+			newLookAction.setTargetPoint(preyPosition);
 
 			currentPlans.Clear();
-			this.currentPlans.Add(newAction);
-			
-			myself.setMoveInUse(true);
+			this.currentPlans.Add(newMoveAction);
+			this.currentPlans.Add(newLookAction);
+
 			return true;
 		}
-		
+
 		return false;
 	}
 }

@@ -21,6 +21,9 @@ public class WorldMap : MonoBehaviour
 	// how many pixels should be moved per second for an agent on the go.
 	private float moveSpeed = 10.0f;
 
+	// general sim multiplier - currently just another multiplier on moveSpeed
+	private float simulationSpeed = 1.0f;
+
 	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
 	private float perfectVisionRange = 2.0f;
 
@@ -469,7 +472,8 @@ public class WorldMap : MonoBehaviour
 	// given a duration of movement.
 	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
 	{
-		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * duration * moveSpeed * agent.getSpeedMultiplier();
+		float netSpeedMultiplier = duration * moveSpeed * simulationSpeed * agent.getSpeedMultiplier();
+		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * netSpeedMultiplier;
 
 		if(isValidPosition(newPoint))
 		{
@@ -551,6 +555,11 @@ public class WorldMap : MonoBehaviour
 	public int getCorpseCount()
 	{
 		return corpseCount;
+	}
+
+	public void setSimulationSpeed(float newSimSpeed)
+	{
+		simulationSpeed = newSimSpeed;
 	}
 
 	#endregion Getters/Setters
