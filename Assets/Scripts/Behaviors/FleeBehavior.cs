@@ -14,25 +14,12 @@ public class FleeBehavior : AgentBehavior
 
 		Action newAction;
 
-		float enemyDistance = float.MaxValue;
-		Vector2 enemyPosition = Vector2.zero;
-		float tempDistance = 0.0f;
-		for(int i=0; i<percepts.Count; i++)
-		{
-			if(percepts[i].living == AgentPercept.LivingState.UNDEAD )
-			{
-				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
-				if( tempDistance < enemyDistance)
-				{
-					enemyDistance = tempDistance;
-					enemyPosition = percepts[i].locOne;
-				}
-			}
-		}
+		Agent nearestEnemy;
+		bool found = findNearestAgent(percepts, AgentPercept.LivingState.UNDEAD, out nearestEnemy);
 		
-		if(enemyDistance < float.MaxValue && !myself.getMoveInUse())
+		if(found && !myself.getMoveInUse())
 		{
-			Vector2 mirror = myself.getLocation() + (myself.getLocation() - enemyPosition);
+			Vector2 mirror = myself.getLocation() + (myself.getLocation() - nearestEnemy.getLocation());
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newAction.setTargetPoint(mirror);
 

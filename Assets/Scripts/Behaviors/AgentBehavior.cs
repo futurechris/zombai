@@ -24,5 +24,35 @@ public class AgentBehavior
 		return true;
 	}
 
+	protected bool findNearestAgent(List<AgentPercept> percepts, AgentPercept.LivingState livingType, out Agent foundAgent)
+	{
+		float targetDistance = float.MaxValue;
+		Vector2 targetPosition = Vector2.zero;
 
+		float tempDistance = 0.0f;
+
+		foundAgent = null;
+
+		for(int i=0; i<percepts.Count; i++)
+		{
+			if(percepts[i].living == livingType )
+			{
+				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
+				
+				if( tempDistance < targetDistance && (percepts[i].perceivedAgent!=null))
+				{
+					targetDistance = tempDistance;
+					targetPosition = percepts[i].locOne;
+					foundAgent = percepts[i].perceivedAgent;
+				}
+			}
+		}
+
+		if(foundAgent != null)
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
