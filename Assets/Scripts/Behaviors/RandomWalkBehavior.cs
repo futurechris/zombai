@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class RandomWalkBehavior : AgentBehavior
 {
 	float updateDelay = 1.0f;
-	float nextUpdate = 0;
+	float nextUpdate = float.MinValue;
 
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
@@ -34,7 +34,7 @@ public class RandomWalkBehavior : AgentBehavior
 
 		this.currentPlans.Add(newAction);
 
-		nextUpdate += 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
 
 		return true;
 	}

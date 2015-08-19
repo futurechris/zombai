@@ -46,6 +46,9 @@ public class WorldMap : MonoBehaviour
 	//   filling up the world.
 	private List<Rect> structures = new List<Rect>();
 
+	// To prevent the "every agent makes a default move first cycle" issue
+	private bool firstPlanComplete = false;
+
 	private float worldWidth = 0;
 	private float worldHeight = 0;
 
@@ -87,15 +90,19 @@ public class WorldMap : MonoBehaviour
 		// equity between all agents.
 		float storedDeltaTime = Time.deltaTime;
 
-		foreach(Agent agent in agents)
+		if(firstPlanComplete)
 		{
-			executeAction(agent, storedDeltaTime);
+			foreach(Agent agent in agents)
+			{
+				executeAction(agent, storedDeltaTime);
+			}
 		}
-
+		
 		// 3. Action arbiter determines outcome of opposed actions
 		ActionArbiter.Instance.resolveActions();
 
 		// 4. Allocate time to agents to process percepts and update plans
+		firstPlanComplete = true;
 		foreach(Agent agent in agents)
 		{
 			// Currently the '1' work unit is meaningless - agents will just do their little

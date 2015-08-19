@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class RandomLookBehavior : AgentBehavior
 {
 	float updateDelay = 1.0f;
-	float nextUpdate = 0;
+	float nextUpdate = float.MinValue;
 	float angle = 0.0f;
 
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)

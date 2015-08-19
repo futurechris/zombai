@@ -5,12 +5,12 @@ using System.Collections.Generic;
 public class WanderBehavior : AgentBehavior
 {
 	float updateDelay = 1.0f;
-	float nextUpdate = 0;
-	float wanderDirection = 0.0f;
+	float nextUpdate = float.MinValue;
+	float wanderDirection = Random.Range(0, 2.0f*Mathf.PI);
 	float wanderDelta = 0.0f;
 
 	float replotDelay = 10.0f;
-	float nextReplot = 0;
+	float nextReplot = float.MinValue;
 
 	
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
@@ -32,7 +32,7 @@ public class WanderBehavior : AgentBehavior
 		if(nextReplot <= Time.time)
 		{
 			wanderDirection = Random.Range(0, 2.0f*Mathf.PI);
-			nextReplot += replotDelay;
+			nextReplot = Time.time + replotDelay;
 		}
 
 		wanderDelta += (Random.value * 0.1f) - 0.05f;
@@ -57,7 +57,7 @@ public class WanderBehavior : AgentBehavior
 		
 		this.currentPlans.Add(newAction);
 		
-		nextUpdate += 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
 		
 		return true;
 	}
