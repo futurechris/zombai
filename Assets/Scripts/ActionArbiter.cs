@@ -26,6 +26,15 @@ public class ActionArbiter {
 
 	#endregion Arbitration parameters
 	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Bookkeeping
+	
+	private WorldMap map = null;
+	
+	#endregion Bookkeeping
+	//////////////////////////////////////////////////////////////////
+
 	public enum ActionType { CONVERT };
 
 	private List<ActionParameters> queuedActions = new List<ActionParameters>();
@@ -58,6 +67,11 @@ public class ActionArbiter {
 		return convertDistance;
 	}
 
+	public void setWorldMap(WorldMap newMap)
+	{
+		map = newMap;
+	}
+
 	#endregion Interface
 	//////////////////////////////////////////////////////////////////
 
@@ -73,6 +87,10 @@ public class ActionArbiter {
 		{
 			// TODO: Is conversion guaranteed? Perhaps some just die, become corpses?
 			action.directObject.configureAs(Agent.AgentType.ZOMBIE);
+			if(map != null)
+			{
+				map.agentCountChange(-1,1,0);
+			}
 		}
 	}
 

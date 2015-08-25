@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class WorldMap : MonoBehaviour
+public class WorldMap
 {
 	//////////////////////////////////////////////////////////////////
 	#region Parameters & properties
@@ -14,26 +14,7 @@ public class WorldMap : MonoBehaviour
 	public GameObject agentPrefab;
 	public GameObject structurePrefab;
 
-	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
-	private int	_targetFramerate = 15; // fps
-	public 	int targetFramerate  = 15;
-
-	// how many pixels should be moved per second for an agent on the go.
-	private float moveSpeed = 10.0f;
-
-	// general sim multiplier - currently just another multiplier on moveSpeed
-	private float simulationSpeed = 1.0f;
-
-	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
-	private float perfectVisionRange = 2.0f;
-
 	#endregion Parameters & properties
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
-	#region Map State
-	private bool paused	= false;
-	#endregion Map State
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
@@ -46,12 +27,10 @@ public class WorldMap : MonoBehaviour
 	//   filling up the world.
 	private List<Rect> structures = new List<Rect>();
 
-	// To prevent the "every agent makes a default move first cycle" issue
-	private bool firstPlanComplete = false;
-
 	private float worldWidth = 0;
 	private float worldHeight = 0;
 
+	private bool agentStateChanged = true;
 	private int livingCount = 0;
 	private int undeadCount = 0;
 	private int corpseCount = 0;
@@ -60,101 +39,22 @@ public class WorldMap : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
-	#region MonoBehaviour methods & helpers
-
-	void Start ()
-	{
-		targetFramerate = _targetFramerate;
-
-		// hard-coding size for now - camera in scene is set to work for this size as well.
-		initializeWorld(1024,768,100);
-		instantiateWorld();
-		populateWorld(400,10,10);
-//		populateTestWorld();
-	}
-
-	void Update ()
-	{
-		// 0. Update parameters
-		updateParameters();
-
-		// 1. If world is paused, exit early
-		if(paused)
-		{
-			return;
-		}
-
-		// 2. Else grab deltaTime, iterate over agents, ask them for action, run for deltaTime
-		// Storing it here because documentation doesn't make it clear if this will change.
-		// I don't expect so, but until I can verify experimentally, I'd like to ensure time
-		// equity between all agents.
-		float storedDeltaTime = Time.deltaTime;
-
-		if(firstPlanComplete)
-		{
-			foreach(Agent agent in agents)
-			{
-				executeAction(agent, storedDeltaTime);
-			}
-		}
-		
-		// 3. Action arbiter determines outcome of opposed actions
-		ActionArbiter.Instance.resolveActions();
-
-		// 4. Allocate time to agents to process percepts and update plans
-		firstPlanComplete = true;
-		foreach(Agent agent in agents)
-		{
-			// Currently the '1' work unit is meaningless - agents will just do their little
-			// calculation and be done with it.
-			if(		agent.getIsAlive() == AgentPercept.LivingState.ALIVE
-			   || 	agent.getIsAlive() == AgentPercept.LivingState.UNDEAD)
-			{
-				agent.setLookInUse(false);
-				agent.setMoveInUse(false);
-				agent.getBehavior().updatePlan( getPercepts(agent), 1 );
-			}
-		}
-
-		// 5. Lazy cache-oid bookkeeping
-		updateAgentCounts();
-	}
-
-	private void updateAgentCounts()
-	{
-		livingCount = undeadCount = corpseCount = 0;
-		foreach(Agent ag in agents)
-		{
-			if(ag.getIsAlive() == AgentPercept.LivingState.ALIVE)
-			{
-				livingCount++;
-			}
-			else if(ag.getIsAlive() == AgentPercept.LivingState.UNDEAD)
-			{
-				undeadCount++;
-			}
-			else if(ag.getIsAlive() == AgentPercept.LivingState.DEAD)
-			{
-				corpseCount++;
-			}
-		}
-	}
-
-	private void updateParameters()
-	{
-		if(targetFramerate != _targetFramerate)
-		{
-			_targetFramerate = targetFramerate;
-		}
-	}
-
-
-	#endregion MonoBehaviour methods & helpers
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
 	#region World initialization, generation, etc.
 
+	// Horrible. Temporary. Will refactor rendering/worldmap data-ness out soon.
+	public WorldMap(int width, int height, int buildingCount,
+	                GameObject aContainerGO, GameObject sContainerGO,
+	                GameObject aPrefab, GameObject sPrefab)
+	{
+		agentsGO = aContainerGO;
+		structuresGO = sContainerGO;
+		agentPrefab = aPrefab;
+		structurePrefab = sPrefab;
+
+		initializeWorld(width,height,buildingCount);
+		instantiateWorld();
+	}
+	
 	// For now, just generates rectangular buildings
 	// width/height in ... pixels?
 	private void initializeWorld(float mapWidth, float mapHeight, int numBuildings)
@@ -179,7 +79,7 @@ public class WorldMap : MonoBehaviour
 		}
 	}
 
-	private void populateTestWorld()
+	public void populateTestWorld()
 	{
 		GameObject humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
 		humanGO.transform.parent = agentsGO.transform;
@@ -198,6 +98,8 @@ public class WorldMap : MonoBehaviour
 		ftb.addBehavior( new NoopBehavior());
 		humanAgent.setBehavior( ftb );
 		agents.Add(humanAgent);
+		livingCount++;
+
 
 		humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
 		humanGO.transform.parent = agentsGO.transform;
@@ -217,6 +119,7 @@ public class WorldMap : MonoBehaviour
 		ftb.addBehavior( new NoopBehavior());
 		humanAgent.setBehavior( ftb );
 		agents.Add(humanAgent);
+		livingCount++;
 
 
 
@@ -246,11 +149,11 @@ public class WorldMap : MonoBehaviour
 //		zombieAgent.setBehavior( zombieFTB );
 
 		agents.Add( zombieAgent );
-
+		undeadCount++;
 	}
 
 	// Create agents, give them behaviors and locations, turn them loose.
-	private void populateWorld(int numLiving, int numCorpses, int numUndead)
+	public void populateWorld(int numLiving, int numCorpses, int numUndead)
 	{
 		GameObject tempGO;
 		Agent tempAgent;
@@ -270,6 +173,7 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 
 			agents.Add(tempAgent);
+			livingCount++;
 		}
 
 		for(int i=0; i<numUndead; i++)
@@ -285,6 +189,7 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 
 			agents.Add(tempAgent);
+			undeadCount++;
 		}
 
 		for(int i=0; i<numCorpses; i++)
@@ -300,6 +205,7 @@ public class WorldMap : MonoBehaviour
 			tempAgent.setLocation(tempPosition);
 
 			agents.Add(tempAgent);
+			corpseCount++;
 		}
 	}
 
@@ -321,7 +227,7 @@ public class WorldMap : MonoBehaviour
 		return testPos;
 	}
 
-	private bool isValidPosition(Vector2 testPos)
+	public bool isValidPosition(Vector2 testPos)
 	{
 		if(		testPos.x < 0
 		   || 	testPos.x >= worldWidth
@@ -363,7 +269,7 @@ public class WorldMap : MonoBehaviour
 	
 	// Agent perceives world through this function alone.
 	// N^2 or worse for now, oh well.
-	private List<AgentPercept> getPercepts(Agent agent)
+	public List<AgentPercept> getPercepts(Agent agent, float perfectVisionRange)
 	{
 		List<AgentPercept> apList = new List<AgentPercept>();
 
@@ -376,7 +282,7 @@ public class WorldMap : MonoBehaviour
 			{
 				continue;
 			}
-			if(canPerceivePosition(agent, agents[i].getLocation()))
+			if(canPerceivePosition(agent, agents[i].getLocation(), perfectVisionRange))
 			{
 				tempPercept 		= new AgentPercept();
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
@@ -407,7 +313,7 @@ public class WorldMap : MonoBehaviour
 		return apList;
 	}
 
-	private bool canPerceivePosition(Agent who, Vector2 where)
+	public bool canPerceivePosition(Agent who, Vector2 where, float perfectVisionRange)
 	{
 		// first, distance between who and where: <= vision distance?
 		Vector2 delta = where - who.getLocation();
@@ -436,118 +342,23 @@ public class WorldMap : MonoBehaviour
 		return false;
 	}
 
-	private List<AgentPercept> perceiveStructure(Agent who, Rect what)
+	public List<AgentPercept> perceiveStructure(Agent who, Rect what)
 	{
 		// TODO: Calculate chunks of walls that are visible, return those.
 		return null;
 	}
 
-	private void executeAction(Agent agent, float duration)
-	{
-		List<Action> planList = agent.getBehavior().getCurrentPlans();
-		for(int i=0; i<planList.Count; i++)
-		{
-			switch(planList[i].getActionType())
-			{
-				case Action.ActionType.STAY:
-					break;
-					
-				case Action.ActionType.MOVE_TOWARDS:
-					moveAgentTowards( agent, planList[i].getTargetPoint(), duration);
-					break;
-					
-				case Action.ActionType.TURN_BY_DEGREES:
-					turnAgentBy( agent, planList[i].getDirection());
-					break;
-					
-				case Action.ActionType.TURN_TO_DEGREES:
-					turnAgentTo( agent, planList[i].getDirection());
-					break;
-					
-				case Action.ActionType.TURN_TOWARDS:
-					turnAgentTowards( agent, planList[i].getTargetPoint());
-					break;
-
-				case Action.ActionType.CONVERT:
-					ActionArbiter.Instance.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
-					break;
-			}
-		}
-	}
-
-	// attempt to move the agent as far as possible towards target,
-	// given a duration of movement.
-	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
-	{
-		float netSpeedMultiplier = duration * moveSpeed * simulationSpeed * agent.getSpeedMultiplier();
-		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * netSpeedMultiplier;
-
-		if(isValidPosition(newPoint))
-		{
-			agent.setLocation(newPoint);
-		}
-		else
-		{
-			// partial movement & wall-sliding go here
-			Vector2 firstStop = nearestDirect(agent.getLocation(), newPoint, 0.125f);
-
-			// in 2D should only have one valid dimension here.
-			// and technically, could get even more accurate by calling nearestDirect again.
-			// TODO: Evaluate whether it's worth using nearestDirect here.
-			Vector2 xTarget = new Vector2(newPoint.x, firstStop.y);
-			Vector2 yTarget = new Vector2(firstStop.x, newPoint.y);
-			if(isValidPosition(xTarget))
-			{
-				agent.setLocation(xTarget);
-			}
-			else if(isValidPosition(yTarget))
-			{
-				agent.setLocation(yTarget);
-			}
-		}
-	}
-
-	private void turnAgentBy(Agent agent, float degrees)
-	{
-		agent.setDirection( agent.getDirection() + degrees );
-	}
-
-	private void turnAgentTo(Agent agent, float angle)
-	{
-		agent.setDirection( angle );
-	}
-
-	private void turnAgentTowards(Agent agent, Vector2 point)
-	{
-		Vector2 delta = point - agent.getLocation()/* - point*/;
-		float angle = (90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y));
-
-		turnAgentTo( agent, angle );
-	}
-
-	private Vector2 nearestDirect(Vector2 start, Vector2 stop, float incrementPercent)
-	{
-		// technically these won't line up well, especially if incrementPercent
-		// is something like 0.1, which doesn't play well with binary.
-		// but Vector2.Lerp clamps [0,1] so at worst it's an extra iteration.
-		Vector2 bestPoint = start;
-		Vector2 tempPoint = start;
-		for(float t = 0; t<=1.00001f; t+=incrementPercent)
-		{
-			tempPoint = Vector2.Lerp(start,stop,t);
-			if(isValidPosition(tempPoint))
-			{
-				bestPoint = tempPoint;
-			}
-		}
-		return bestPoint;
-	}
 
 	#endregion Agent-World Interactions
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
 	#region Getters/Setters
+
+	public List<Agent> getAgents()
+	{
+		return agents;
+	}
 
 	public int getLivingCount()
 	{
@@ -564,9 +375,11 @@ public class WorldMap : MonoBehaviour
 		return corpseCount;
 	}
 
-	public void setSimulationSpeed(float newSimSpeed)
+	public void agentCountChange(int deltaLiving, int deltaUndead, int deltaCorpse)
 	{
-		simulationSpeed = newSimSpeed;
+		livingCount += deltaLiving;
+		undeadCount += deltaUndead;
+		corpseCount += deltaCorpse;
 	}
 
 	#endregion Getters/Setters
