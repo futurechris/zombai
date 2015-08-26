@@ -157,7 +157,8 @@ public class WorldMap
 	{
 		GameObject tempGO;
 		Agent tempAgent;
-		Vector2 tempPosition = Vector2.zero;
+		AgentRenderer tempRenderer;
+
 		AgentBehavior tempAgentBehavior;
 		FallThroughBehavior tempFTB;
 		for(int i=0; i<numLiving; i++)
@@ -166,13 +167,14 @@ public class WorldMap
 			tempGO.transform.parent = agentsGO.transform;
 			tempGO.name = "Living "+i;
 
-			tempPosition = getValidAgentPosition();
+			tempRenderer = tempGO.GetComponent<AgentRenderer>();
 
-			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.configureAs(Agent.AgentType.HUMAN);
-			tempAgent.setLocation(tempPosition);
+			tempAgent = new Agent(Agent.AgentType.HUMAN);
+			tempAgent.setLocation(getValidAgentPosition());
 
+			tempRenderer.setAgent(tempAgent);
 			agents.Add(tempAgent);
+
 			livingCount++;
 		}
 
@@ -182,13 +184,14 @@ public class WorldMap
 			tempGO.transform.parent = agentsGO.transform;
 			tempGO.name = "Undead "+i;
 			
-			tempPosition = getValidAgentPosition();
-
-			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.configureAs(Agent.AgentType.ZOMBIE);
-			tempAgent.setLocation(tempPosition);
-
+			tempRenderer = tempGO.GetComponent<AgentRenderer>();
+			
+			tempAgent = new Agent(Agent.AgentType.ZOMBIE);
+			tempAgent.setLocation(getValidAgentPosition());
+			
+			tempRenderer.setAgent(tempAgent);
 			agents.Add(tempAgent);
+			
 			undeadCount++;
 		}
 
@@ -198,13 +201,14 @@ public class WorldMap
 			tempGO.transform.parent = agentsGO.transform;
 			tempGO.name = "Corpse "+i;
 			
-			tempPosition = getValidAgentPosition();
+			tempRenderer = tempGO.GetComponent<AgentRenderer>();
 			
-			tempAgent = tempGO.GetComponent<Agent>();
-			tempAgent.configureAs(Agent.AgentType.CORPSE);
-			tempAgent.setLocation(tempPosition);
-
+			tempAgent = new Agent(Agent.AgentType.CORPSE);
+			tempAgent.setLocation(getValidAgentPosition());
+			
+			tempRenderer.setAgent(tempAgent);
 			agents.Add(tempAgent);
+			
 			corpseCount++;
 		}
 	}

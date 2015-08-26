@@ -2,20 +2,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-public class Agent : MonoBehaviour
+public class Agent
 {
 	// Regularly used agent types to speed up initialization
 	// and enable conversion between agent types
 	public enum AgentType { CUSTOM, HUMAN, ZOMBIE, CORPSE };
 
-	public SpriteRenderer agentSprite;
-	public Image fovImage;
-
 	//////////////////////////////////////////////////////////////////
-	#region Agent traits
+	#region Bookkeeping
 	private	System.Guid guid				= System.Guid.NewGuid();
 	private bool needsInitialization		= true;
 
+	private AgentRenderer myRenderer;
+
+	#endregion Bookkeeping
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Agent traits
 	// Several of these wouldn't "const" correctly, so for now non-DRYly
 	// duplicating the 'defaults' down in configureDefault()
 	private AgentPercept.LivingState living	= AgentPercept.LivingState.ALIVE;
@@ -37,21 +41,17 @@ public class Agent : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
-	#region MonoBehaviour methods
-	
-	void Start ()
-	{
-		if(needsInitialization)
-		{
-			configureDefault();
-			needsInitialization = false;
-		}
+	#region Constructor/init
 
-		recalculateFOVImage();
-	}
-	
-	void Update ()
-	{	
+	public Agent(): this(AgentType.HUMAN){}
+
+	public Agent(AgentType newType)
+	{
+		configureAs(newType,true);
+		if(myRenderer != null)
+		{
+			myRenderer.recalculateFOVImage();
+		}
 	}
 
 	#endregion MonoBehaviour methods
@@ -175,28 +175,13 @@ public class Agent : MonoBehaviour
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
-	#region Helpers
-
-	private void recalculateFOVImage()
-	{
-		// For now, just immediately setting this. Later would be nice to smooth the transition.
-		// That goes for the actual vision cone as well - instant turning is a little strange.
-
-		// The prefab for agents sets the 'fill origin' as being to the right. Fill is clockwise.
-		// % to fill is easy, just the percentage of a circle represented by fieldOfView.
-		fovImage.fillAmount = fieldOfView / 360.0f;
-
-		// angle then is direction-half that?
-		fovImage.rectTransform.rotation = Quaternion.identity; // reset rotation
-		fovImage.rectTransform.Rotate(0.0f, 0.0f, (direction + (fieldOfView/2.0f)));
-	}
-
-	#endregion Helpers
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
 	#region Getter/Setters
 	// Many of these may be fine as properties, but I'm expecting some/all to grow complex.
+
+	public void setRenderer(AgentRenderer newRenderer)
+	{
+		myRenderer = newRenderer;
+	}
 
 	public System.Guid getGuid()
 	{
@@ -210,7 +195,10 @@ public class Agent : MonoBehaviour
 	public void setAgentColor(Color newColor)
 	{
 		agentColor = newColor;
-		agentSprite.color = agentColor;
+		if(myRenderer != null)
+		{
+			myRenderer.updateColor();
+		}
 	}
 
 	public AgentPercept.LivingState getIsAlive()
@@ -239,7 +227,10 @@ public class Agent : MonoBehaviour
 	public void setLocation(Vector2 newLocation)
 	{
 		location = newLocation;
-		this.transform.localPosition = newLocation;
+		if(myRenderer != null)
+		{
+			myRenderer.updateLocation();
+		}
 	}
 
 	public float getDirection()
@@ -257,7 +248,11 @@ public class Agent : MonoBehaviour
 		{
 			direction -= 360;
 		}
-		recalculateFOVImage();
+		if(myRenderer != null)
+		{
+			myRenderer.recalculateFOVImage();
+		}
+
 	}
 
 	public float getFieldOfView()
@@ -267,18 +262,25 @@ public class Agent : MonoBehaviour
 	public void setFieldOfView(float newFieldOfView)
 	{
 		fieldOfView = newFieldOfView;
-		recalculateFOVImage();
+		if(myRenderer != null)
+		{
+			myRenderer.recalculateFOVImage();
+		}
 	}
 
 	public float getSightRange()
 	{
 		return sightRange;
 	}
+
 	public void setSightRange(float newRange)
 	{
 		float multiplier = newRange/16f; // magic number, but accurate.
 		sightRange = newRange;
-		fovImage.rectTransform.localScale = new Vector3(multiplier, multiplier, 1.0f);
+		if(myRenderer != null)
+		{
+			myRenderer.updateFOVScale();
+		}
 	}
 
 	public float getSpeedMultiplier()
