@@ -7,17 +7,8 @@ public class AgentDirector : MonoBehaviour {
 	//////////////////////////////////////////////////////////////////
 	#region Parameters & properties
 
-	/////////////
-	// TEMPORARY
-	public GameObject agentsGO;		// object agents are placed under - just organizational
-	public GameObject structuresGO;	// ditto for structures
-	
-	public GameObject agentPrefab;
-	public GameObject structurePrefab;
-	// TEMPORARY
-	/////////////
-
 	public OverlayUpdater overlayUpdater;
+	public WorldMapRenderer mapRenderer;
 
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
 	private int	_targetFramerate = 15; // fps
@@ -56,9 +47,11 @@ public class AgentDirector : MonoBehaviour {
 	void Start()
 	{
 		// hard-coding size for now - camera in scene is set to work for this size as well.
-		worldMap = new WorldMap(1024,768,100, agentsGO, structuresGO, agentPrefab, structurePrefab);
+		worldMap = new WorldMap(1024,768,100);
 		worldMap.populateWorld(400,10,10);
-//		worldMap.populateTestWorld();
+
+		mapRenderer.setWorldMap(worldMap);
+		mapRenderer.instantiateWorld();
 
 		ActionArbiter.Instance.setWorldMap(worldMap);
 		if(overlayUpdater != null)

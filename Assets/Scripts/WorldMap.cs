@@ -6,13 +6,8 @@ public class WorldMap
 {
 	//////////////////////////////////////////////////////////////////
 	#region Parameters & properties
+
 	private int minimumStreetWidth = 5;
-
-	public GameObject agentsGO;		// object agents are placed under - just organizational
-	public GameObject structuresGO;	// ditto for structures
-
-	public GameObject agentPrefab;
-	public GameObject structurePrefab;
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -42,17 +37,9 @@ public class WorldMap
 	#region World initialization, generation, etc.
 
 	// Horrible. Temporary. Will refactor rendering/worldmap data-ness out soon.
-	public WorldMap(int width, int height, int buildingCount,
-	                GameObject aContainerGO, GameObject sContainerGO,
-	                GameObject aPrefab, GameObject sPrefab)
+	public WorldMap(int width, int height, int buildingCount)
 	{
-		agentsGO = aContainerGO;
-		structuresGO = sContainerGO;
-		agentPrefab = aPrefab;
-		structurePrefab = sPrefab;
-
 		initializeWorld(width,height,buildingCount);
-		instantiateWorld();
 	}
 	
 	// For now, just generates rectangular buildings
@@ -79,134 +66,38 @@ public class WorldMap
 		}
 	}
 
-	public void populateTestWorld()
-	{
-		GameObject humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
-		humanGO.transform.parent = agentsGO.transform;
-		humanGO.name = "Living 1";
-
-		Agent humanAgent = humanGO.GetComponent<Agent>();
-		humanAgent.setAgentColor(Color.green);
-		humanAgent.setLocation(new Vector2(worldWidth/2.0f + 40.0f, worldHeight/2.0f + -40.0f));
-		humanAgent.configureAs(Agent.AgentType.HUMAN);
-		humanAgent.setSightRange(50.0f);
-		humanAgent.setFieldOfView(90.0f);
-		humanAgent.setDirection(0.0f);
-		humanAgent.setSpeedMultiplier(1.15f);
-
-		FallThroughBehavior ftb = new FallThroughBehavior();
-		ftb.addBehavior( new NoopBehavior());
-		humanAgent.setBehavior( ftb );
-		agents.Add(humanAgent);
-		livingCount++;
-
-
-		humanGO = GameObject.Instantiate(agentPrefab) as GameObject;
-		humanGO.transform.parent = agentsGO.transform;
-		humanGO.name = "Living 2";
-
-		humanAgent = humanGO.GetComponent<Agent>();
-		humanAgent.setAgentColor(Color.green);
-//		humanAgent.setLocation(new Vector2(worldWidth/2.0f + 20f, worldHeight/2.0f + -34.64101616f)); // 30 degrees
-		humanAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f-40.0f));
-		humanAgent.configureAs(Agent.AgentType.HUMAN);
-		humanAgent.setSightRange(50.0f);
-		humanAgent.setFieldOfView(90.0f);
-		humanAgent.setDirection(0.0f);
-		humanAgent.setSpeedMultiplier(1.15f);
-		
-		ftb = new FallThroughBehavior();
-		ftb.addBehavior( new NoopBehavior());
-		humanAgent.setBehavior( ftb );
-		agents.Add(humanAgent);
-		livingCount++;
-
-
-
-
-		GameObject zombieGO = GameObject.Instantiate(agentPrefab) as GameObject;
-		zombieGO.transform.parent = agentsGO.transform;
-		zombieGO.name = "Undead 1";
-
-		Agent zombieAgent = zombieGO.GetComponent<Agent>();
-		zombieAgent.setAgentColor(Color.magenta);
-		zombieAgent.setLocation(new Vector2(worldWidth/2.0f, worldHeight/2.0f));
-		zombieAgent.configureAs(Agent.AgentType.ZOMBIE);
-		zombieAgent.setSightRange(100.0f);
-		zombieAgent.setFieldOfView(120.0f);
-		zombieAgent.setDirection(0.0f);
-
-		FallThroughBehavior tempFTB = new FallThroughBehavior();
-		tempFTB.addBehavior( new ZombifyBehavior() );
-		tempFTB.addBehavior( new PursueBehavior() );
-		tempFTB.addBehavior( new NecrophageBehavior() );
-		tempFTB.addBehavior( new WanderBehavior() );
-		tempFTB.addBehavior( new RandomLookBehavior() );
-		zombieAgent.setBehavior(tempFTB);
-		
-//		FallThroughBehavior zombieFTB = new FallThroughBehavior();
-//		zombieFTB.addBehavior( new NoopBehavior());
-//		zombieAgent.setBehavior( zombieFTB );
-
-		agents.Add( zombieAgent );
-		undeadCount++;
-	}
-
 	// Create agents, give them behaviors and locations, turn them loose.
 	public void populateWorld(int numLiving, int numCorpses, int numUndead)
 	{
-		GameObject tempGO;
 		Agent tempAgent;
-		AgentRenderer tempRenderer;
 
 		AgentBehavior tempAgentBehavior;
 		FallThroughBehavior tempFTB;
 		for(int i=0; i<numLiving; i++)
 		{
-			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
-			tempGO.transform.parent = agentsGO.transform;
-			tempGO.name = "Living "+i;
-
-			tempRenderer = tempGO.GetComponent<AgentRenderer>();
-
 			tempAgent = new Agent(Agent.AgentType.HUMAN);
 			tempAgent.setLocation(getValidAgentPosition());
 
-			tempRenderer.setAgent(tempAgent);
 			agents.Add(tempAgent);
 
 			livingCount++;
 		}
 
 		for(int i=0; i<numUndead; i++)
-		{
-			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
-			tempGO.transform.parent = agentsGO.transform;
-			tempGO.name = "Undead "+i;
-			
-			tempRenderer = tempGO.GetComponent<AgentRenderer>();
-			
+		{	
 			tempAgent = new Agent(Agent.AgentType.ZOMBIE);
 			tempAgent.setLocation(getValidAgentPosition());
-			
-			tempRenderer.setAgent(tempAgent);
+
 			agents.Add(tempAgent);
 			
 			undeadCount++;
 		}
 
 		for(int i=0; i<numCorpses; i++)
-		{
-			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
-			tempGO.transform.parent = agentsGO.transform;
-			tempGO.name = "Corpse "+i;
-			
-			tempRenderer = tempGO.GetComponent<AgentRenderer>();
-			
+		{	
 			tempAgent = new Agent(Agent.AgentType.CORPSE);
 			tempAgent.setLocation(getValidAgentPosition());
-			
-			tempRenderer.setAgent(tempAgent);
+
 			agents.Add(tempAgent);
 			
 			corpseCount++;
@@ -249,20 +140,6 @@ public class WorldMap
 			}
 		}
 		return true;
-	}
-	
-	private void instantiateWorld()
-	{
-		// Structures
-		// loop over structures, instantiate prefabs, position them.
-		foreach(Rect rect in structures)
-		{
-			GameObject structGO = GameObject.Instantiate(structurePrefab) as GameObject;
-			structGO.transform.parent = structuresGO.transform;
-
-			structGO.transform.localScale = new Vector3(rect.width, rect.height, 1.0f);
-			structGO.transform.position = new Vector3(rect.x+(rect.width/2.0f), rect.y+(rect.height/2.0f), 5.0f);
-		}
 	}
 
 	#endregion World initialization, generation, etc.
@@ -362,6 +239,11 @@ public class WorldMap
 	public List<Agent> getAgents()
 	{
 		return agents;
+	}
+
+	public List<Rect> getStructures()
+	{
+		return structures;
 	}
 
 	public int getLivingCount()
