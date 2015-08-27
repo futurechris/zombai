@@ -81,8 +81,11 @@ public class AgentDirector : MonoBehaviour {
 		
 		// 3. Action arbiter determines outcome of opposed actions
 		ActionArbiter.Instance.resolveActions();
-		
-		// 4. Allocate time to agents to process percepts and update plans
+
+		// 4. Update worldMap's quadTree
+		worldMap.updateAgentTree();
+
+		// 5. Allocate time to agents to process percepts and update plans
 		foreach(Agent agent in worldMap.getAgents())
 		{
 			// Currently the '1' work unit is meaningless - agents will just do their little

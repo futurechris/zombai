@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using QuadTree;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -16,11 +17,13 @@ public class WorldMap
 	#region Bookkeeping
 	
 	private List<Agent> agents = new List<Agent>();
+	private QuadTree<Agent> agentTree;
 	private List<int> workUnits = new List<int>();
 
 	// Obv. just a PH, but this is a list of the rectangular (axis-aligned) rectangular buildings
 	//   filling up the world.
 	private List<Rect> structures = new List<Rect>();
+	private QuadTree<Rect> buildingTree;
 
 	private float worldWidth = 0;
 	private float worldHeight = 0;
@@ -49,6 +52,9 @@ public class WorldMap
 		worldWidth = mapWidth;
 		worldHeight = mapHeight;
 
+		agentTree = new QuadTree<Agent>(10, 0, 0, worldWidth, worldHeight);
+		buildingTree = new QuadTree<Rect>(10, 0, 0, worldWidth, worldHeight);
+
 		// Probably get something closer to a city by carving streets out 
 		//   rather than trying to fill with boxes.
 		float streetWidth = Mathf.Max(minimumStreetWidth, Mathf.Floor(worldWidth * 0.01f));
@@ -62,7 +68,11 @@ public class WorldMap
 			float xPos = Random.Range(0.0f, worldWidth-xDim);
 			float yPos = Random.Range(0.0f, worldHeight-yDim);
 
-			structures.Add( new Rect(xPos,yPos, xDim,yDim) );
+			// For now just letting these be redundant
+			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+yDim);
+			Rect tempRect = new Rect(xPos,yPos, xDim,yDim);
+			buildingTree.Insert(tempRect, ref tempQuad);
+			structures.Add( tempRect );
 		}
 	}
 
@@ -73,6 +83,7 @@ public class WorldMap
 
 		AgentBehavior tempAgentBehavior;
 		FallThroughBehavior tempFTB;
+
 		for(int i=0; i<numLiving; i++)
 		{
 			tempAgent = new Agent(Agent.AgentType.HUMAN);
@@ -102,6 +113,7 @@ public class WorldMap
 			
 			corpseCount++;
 		}
+		updateAgentTree();
 	}
 
 	private Vector2 getValidAgentPosition()
@@ -132,13 +144,12 @@ public class WorldMap
 			return false;
 		}
 
-		for(int i=0; i<structures.Count; i++)
+		List<Rect> collisions = new List<Rect>();
+		if (buildingTree.SearchPoint(testPos.x, testPos.y, ref collisions))
 		{
-			if(structures[i].Contains(testPos))
-			{
-				return false;
-			}
+			return false;
 		}
+
 		return true;
 	}
 
@@ -156,40 +167,49 @@ public class WorldMap
 
 		AgentPercept tempPercept;
 
-		for(int i=0; i<agents.Count; i++)
+		List<Agent> nearbyAgents = new List<Agent>();
+		Vector2 loc = agent.getLocation();
+		float radius = agent.getSightRange();
+		Quad visibleArea = new Quad( loc.x-radius, loc.y-radius, loc.x+radius, loc.y+radius );
+
+		agentTree.SearchArea(visibleArea, ref nearbyAgents);
+
+		for(int i=0; i<nearbyAgents.Count; i++)
 		{
 			// For now not doing self-aware. No Skynet on *my* watch!
-			if(agent.getGuid() == agents[i].getGuid())
+			if(agent.getGuid() == nearbyAgents[i].getGuid())
 			{
 				continue;
 			}
-			if(canPerceivePosition(agent, agents[i].getLocation(), perfectVisionRange))
+			if(canPerceivePosition(agent, nearbyAgents[i].getLocation(), perfectVisionRange))
 			{
 				tempPercept 		= new AgentPercept();
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
-				tempPercept.locOne 	= agents[i].getLocation();
-				tempPercept.living 	= agents[i].getIsAlive();
+				tempPercept.locOne 	= nearbyAgents[i].getLocation();
+				tempPercept.living 	= nearbyAgents[i].getIsAlive();
 
 				// TODO: Agent object should not be part of percept, fix!
 				// See AgentPercept.perceivedAgent for more.
-				tempPercept.perceivedAgent = agents[i];
+				tempPercept.perceivedAgent = nearbyAgents[i];
 
 				apList.Add(tempPercept);
 				tempPercept 		= null;
 			}
 		}
 
+		List<Rect> nearbyStructures = new List<Rect>();
+		buildingTree.SearchArea(visibleArea, ref nearbyStructures);
+
 		List<AgentPercept> structureList = null;
-		for(int i=0; i<structures.Count; i++)
+		for(int i=0; i<nearbyStructures.Count; i++)
 		{
-			structureList = perceiveStructure(agent, structures[i]);
+			structureList = perceiveStructure(agent, nearbyStructures[i]);
 			if(structureList != null)
 			{
 				apList.AddRange(structureList);
 			}
 			structureList = null;
 		}
-
 
 		return apList;
 	}
@@ -231,6 +251,22 @@ public class WorldMap
 
 
 	#endregion Agent-World Interactions
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
+	#region Tree Helpers
+	public void updateAgentTree()
+	{
+		// QuadTree.cs suggests clearing the tree every frame and rebuilding,
+		// for cases like this where there are a lot of moving objects. Will
+		// try that for now.
+		agentTree.Clear();
+		for(int i=0; i<agents.Count; i++)
+		{
+			agentTree.Insert(agents[i],agents[i].getLocation().x, agents[i].getLocation().y, 0,0);
+		}
+	}
+	#endregion Tree Helpers
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
