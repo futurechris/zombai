@@ -31,6 +31,13 @@ public class AgentDirector : MonoBehaviour {
 
 	WorldMap worldMap;
 
+	float cycles = 0;
+	float timeAB = 0.0f;
+	float timeBC = 0.0f;
+	float timeCD = 0.0f;
+	float timeDE = 0.0f;
+	float timeEF = 0.0f;
+
 	#endregion Bookkeeping
 	////////////////////////////////////////
 
@@ -48,7 +55,7 @@ public class AgentDirector : MonoBehaviour {
 	{
 		// hard-coding size for now - camera in scene is set to work for this size as well.
 		worldMap = new WorldMap(1024,768,100);
-		worldMap.populateWorld(400,10,10);
+		worldMap.populateWorld(1000,10,10);
 
 		mapRenderer.setWorldMap(worldMap);
 		mapRenderer.instantiateWorld();
@@ -63,28 +70,32 @@ public class AgentDirector : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
-
+		float timeA = Time.realtimeSinceStartup;
 		// 0. Update parameters
 		updateParameters();
-		
+
 		// 1. If world is paused, exit early
 		if(paused)
 		{
 			return;
 		}
-		
+
+		float timeB = Time.realtimeSinceStartup;
 		// 2. Iterate over agents, ask them for action, run for deltaTime
 		foreach(Agent agent in worldMap.getAgents())
 		{
 			executeAction(agent, Time.deltaTime);
 		}
-		
+
+		float timeC = Time.realtimeSinceStartup;
 		// 3. Action arbiter determines outcome of opposed actions
 		ActionArbiter.Instance.resolveActions();
 
+		float timeD = Time.realtimeSinceStartup;
 		// 4. Update worldMap's quadTree
 		worldMap.updateAgentTree();
 
+		float timeE = Time.realtimeSinceStartup;
 		// 5. Allocate time to agents to process percepts and update plans
 		foreach(Agent agent in worldMap.getAgents())
 		{
@@ -98,6 +109,25 @@ public class AgentDirector : MonoBehaviour {
 				agent.getBehavior().updatePlan( worldMap.getPercepts(agent, perfectVisionRange), 1 );
 			}
 		}
+		float timeF = Time.realtimeSinceStartup;
+		cycles++;
+
+		timeAB += (timeB-timeA);
+		timeBC += (timeC-timeB);
+		timeCD += (timeD-timeC);
+		timeDE += (timeE-timeD);
+		timeEF += (timeF-timeE);
+
+		float avgAB = timeAB/cycles;
+		float avgBC = timeBC/cycles;
+		float avgCD = timeCD/cycles;
+		float avgDE = timeDE/cycles;
+		float avgEF = timeEF/cycles;
+		float total = (avgAB+avgBC+avgCD+avgDE+avgEF)/100.0f;
+
+		Debug.Log("Times:    "+timeAB+", "+timeBC+", "+timeCD+", "+timeDE+", "+timeEF);
+		Debug.Log("AvgTimes: "+avgAB+", "+avgBC+", "+avgCD+", "+avgDE+", "+avgEF);
+		Debug.Log("Percents: "+(avgAB/total)+", "+(avgBC/total)+", "+(avgCD/total)+", "+(avgDE/total)+", "+(avgEF/total));
 	}
 	
 	private void updateParameters()

@@ -9,6 +9,8 @@ public class WorldMap
 	#region Parameters & properties
 
 	private int minimumStreetWidth = 5;
+	private int agentTreeSplit = 50;
+	private int buildingTreeSplit = 10;
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -52,8 +54,8 @@ public class WorldMap
 		worldWidth = mapWidth;
 		worldHeight = mapHeight;
 
-		agentTree = new QuadTree<Agent>(10, 0, 0, worldWidth, worldHeight);
-		buildingTree = new QuadTree<Rect>(10, 0, 0, worldWidth, worldHeight);
+		agentTree = new QuadTree<Agent>(agentTreeSplit, 0, 0, worldWidth, worldHeight);
+		buildingTree = new QuadTree<Rect>(buildingTreeSplit, 0, 0, worldWidth, worldHeight);
 
 		// Probably get something closer to a city by carving streets out 
 		//   rather than trying to fill with boxes.
