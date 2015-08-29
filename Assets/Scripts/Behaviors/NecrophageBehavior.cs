@@ -13,7 +13,7 @@ public class NecrophageBehavior : AgentBehavior
 		Agent tempAgent;
 		bool found = findNearestAgent(percepts, AgentPercept.LivingState.DEAD, out tempAgent);
 		
-		if(found && !myself.getMoveInUse())
+		if(found && !myself.getMoveInUse() && !myself.getLookInUse())
 		{
 			newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
 			newMoveAction.setTargetPoint(tempAgent.getLocation());
