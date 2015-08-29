@@ -86,10 +86,15 @@ public class ActionArbiter {
 		if( distance <= convertDistance )
 		{
 			// TODO: Is conversion guaranteed? Perhaps some just die, become corpses?
-			action.directObject.configureAs(Agent.AgentType.ZOMBIE);
-			if(map != null)
-			{
-				map.agentCountChange(-1,1,0);
+			// certainly possible to get multiple zombies attempting to convert in one cycle
+			// so, prevent that
+			if(action.directObject.getIsAlive() == AgentPercept.LivingState.ALIVE)
+			{	
+				action.directObject.configureAs(Agent.AgentType.ZOMBIE);
+				if(map != null)
+				{
+					map.agentCountChange(-1,1,0);
+				}
 			}
 		}
 	}

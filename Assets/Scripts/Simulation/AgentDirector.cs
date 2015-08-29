@@ -118,11 +118,15 @@ public class AgentDirector : MonoBehaviour {
 		timeDE += (timeE-timeD);
 		timeEF += (timeF-timeE);
 
-		float avgAB = timeAB/cycles;
-		float avgBC = timeBC/cycles;
-		float avgCD = timeCD/cycles;
-		float avgDE = timeDE/cycles;
-		float avgEF = timeEF/cycles;
+		// comments are rough results of tests
+		// Roughly one third spent on executeAction
+		// Most of the remaining on planning
+		// Good! Gives us space to improve with LOD.
+		float avgAB = timeAB/cycles; // 0
+		float avgBC = timeBC/cycles; // 32
+		float avgCD = timeCD/cycles; // 0
+		float avgDE = timeDE/cycles; // 1
+		float avgEF = timeEF/cycles; // 67
 		float total = (avgAB+avgBC+avgCD+avgDE+avgEF)/100.0f;
 
 		Debug.Log("Times:    "+timeAB+", "+timeBC+", "+timeCD+", "+timeDE+", "+timeEF);
