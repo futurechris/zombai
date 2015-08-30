@@ -8,10 +8,19 @@ public class SimControlHandler : MonoBehaviour {
 	public Slider simSpeedSlider;
 	public WorldMap map;
 
+	private bool initialSet = false;
+
 	// Use this for initialization
 //	void Start () {}
 	// Update is called once per frame
-//	void Update () {}
+	void Update()
+	{
+		if(!initialSet)
+		{
+			simulationSpeedChanged();
+			initialSet = true;
+		}
+	}
 
 	public void simulationSpeedChanged()
 	{
