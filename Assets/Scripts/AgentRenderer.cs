@@ -54,12 +54,14 @@ public class AgentRenderer : MonoBehaviour {
 	{
 		float multiplier = agent.getSightRange() / fovMultiplier;
 		fovImage.rectTransform.localScale = new Vector3(multiplier, multiplier, 1.0f);
+		fovImage.SetAllDirty();
 	}
 
 	public void fullUpdate()
 	{
 		updateLocation();
 		updateColor();
+		updateFOVScale();
 		recalculateFOVImage();
 	}
 
@@ -81,6 +83,7 @@ public class AgentRenderer : MonoBehaviour {
 		// angle then is direction-half that?
 		fovImage.rectTransform.rotation = Quaternion.identity; // reset rotation
 		fovImage.rectTransform.Rotate(0.0f, 0.0f, (agent.getDirection() + (agent.getFieldOfView()/2.0f)));
+		fovImage.SetAllDirty();
 	}
 
 	#endregion Helpers

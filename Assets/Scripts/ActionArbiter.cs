@@ -90,7 +90,7 @@ public class ActionArbiter {
 			// so, prevent that
 			if(action.directObject.getIsAlive() == AgentPercept.LivingState.ALIVE)
 			{	
-				action.directObject.configureAs(Agent.AgentType.ZOMBIE);
+				action.directObject.configureAs(Agent.AgentType.ZOMBIE, true);
 				if(map != null)
 				{
 					map.agentCountChange(-1,1,0);
