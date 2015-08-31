@@ -28,14 +28,9 @@ public class WorldMapRenderer : MonoBehaviour {
 	//////////////////////////////////////////////////////////////////
 	#region MonoBehaviour methods & helpers
 	// Use this for initialization
-	void Start () {
-	
-	}
-	
+//	void Start(){}
 	// Update is called once per frame
-	void Update () {
-	
-	}
+//	void Update(){}
 	#endregion MonoBehaviour methods & helpers
 	//////////////////////////////////////////////////////////////////
 
@@ -58,6 +53,7 @@ public class WorldMapRenderer : MonoBehaviour {
 		for(int i=0; i<agents.Count; i++)
 		{
 			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+
 			tempGO.transform.parent = agentsGO.transform;
 			tempGO.name = "Agent "+i;
 
@@ -69,13 +65,15 @@ public class WorldMapRenderer : MonoBehaviour {
 	private void instantiateStructures()
 	{
 		List<Rect> structures = myWorld.getStructures();
+		RectTransform tempRT;
 		foreach(Rect rect in structures)
 		{
 			GameObject structGO = GameObject.Instantiate(structurePrefab) as GameObject;
-			structGO.transform.parent = structuresGO.transform;
-			
-			structGO.transform.localScale = new Vector3(rect.width, rect.height, 1.0f);
-			structGO.transform.position = new Vector3(rect.x+(rect.width/2.0f), rect.y+(rect.height/2.0f), 5.0f);
+			tempRT = structGO.GetComponent<RectTransform>();
+
+			tempRT.SetParent(structuresGO.transform);
+			tempRT.localPosition = new Vector3(rect.x, rect.y, 0.0f);
+			tempRT.localScale = new Vector3(rect.width, rect.height, 1.0f);
 		}
 	}
 
