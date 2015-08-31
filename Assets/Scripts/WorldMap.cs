@@ -71,8 +71,12 @@ public class WorldMap
 			float yPos = Random.Range(0.0f, worldHeight-yDim);
 
 			// For now just letting these be redundant
-			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+yDim);
-			Rect tempRect = new Rect(xPos,yPos, xDim,yDim);
+//			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+yDim);
+//			Rect tempRect = new Rect(xPos,yPos, xDim,yDim);
+
+			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+xDim);
+			Rect tempRect = new Rect(xPos, yPos, xDim, xDim);
+
 			buildingTree.Insert(tempRect, ref tempQuad);
 			structures.Add( tempRect );
 		}
@@ -304,6 +308,16 @@ public class WorldMap
 		livingCount += deltaLiving;
 		undeadCount += deltaUndead;
 		corpseCount += deltaCorpse;
+	}
+
+	public float getWidth()
+	{
+		return worldWidth;
+	}
+
+	public float getHeight()
+	{
+		return worldHeight;
 	}
 
 	#endregion Getters/Setters
