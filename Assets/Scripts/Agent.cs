@@ -4,9 +4,18 @@ using System.Collections;
 
 public class Agent
 {
+	//////////////////////////////////////////////////////////////////
+	#region Agent Types/Defaults
 	// Regularly used agent types to speed up initialization
 	// and enable conversion between agent types
 	public enum AgentType { CUSTOM, HUMAN, ZOMBIE, CORPSE };
+
+	private static Color humanColor = Color.green;
+	private static Color zombieColor = Color.red;
+	private static Color corpseColor = Color.cyan;
+
+	#endregion Agent Types/Defaults
+	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
@@ -99,7 +108,7 @@ public class Agent
 
 	private void configureAsCorpse()
 	{
-		setAgentColor(Color.cyan);
+		setAgentColor(corpseColor);
 		setIsAlive(AgentPercept.LivingState.DEAD);
 		setSightRange(0.0f);
 		setFieldOfView(0.0f);
@@ -110,7 +119,7 @@ public class Agent
 
 	private void configureAsHuman()
 	{
-		setAgentColor(Color.green);
+		setAgentColor(humanColor);
 		setIsAlive(AgentPercept.LivingState.ALIVE);
 		setSightRange(36.0f);
 		setFieldOfView(180.0f); // roughly full range of vision
@@ -127,7 +136,7 @@ public class Agent
 
 	private void configureAsZombie()
 	{
-		setAgentColor(Color.magenta);
+		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
 		setSightRange(25.0f);
 		setFieldOfView(120.0f);
@@ -149,7 +158,7 @@ public class Agent
 	{
 		setIsAlive(AgentPercept.LivingState.ALIVE);
 		setBehavior(new NoopBehavior());
-		setAgentColor(Color.cyan);
+		setAgentColor(humanColor);
 
 		setDirection(0.0f);
 		setFieldOfView(0.0f);
