@@ -14,6 +14,10 @@ public class AgentDirector : MonoBehaviour {
 	public int worldHeight = 768;
 	public int buildingCount = 100;
 
+	public int initLivingCount = 1000;
+	public int initUndeadCount = 1;
+	public int initCorpseCount = 0;
+
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
 	private int	_targetFramerate = 15; // fps
 	public 	int targetFramerate  = 15;
@@ -57,14 +61,21 @@ public class AgentDirector : MonoBehaviour {
 	// Use this for initialization
 	void Start()
 	{
-		// hard-coding size for now - camera in scene is set to work for this size as well.
-		configureCamera();
-		worldMap = new WorldMap(worldWidth,worldHeight,buildingCount);
-		worldMap.populateWorld(1000,10,10);
+		buildWorld();
+	}
 
+	private void buildWorld()
+	{
+		if(mapRenderer != null)
+		{
+			mapRenderer.purge();
+		}
+		worldMap = new WorldMap(worldWidth,worldHeight,buildingCount);
+		worldMap.populateWorld(initLivingCount,initCorpseCount,initUndeadCount);
+		
 		mapRenderer.setWorldMap(worldMap);
 		mapRenderer.instantiateWorld();
-
+		
 		ActionArbiter.Instance.setWorldMap(worldMap);
 		if(overlayUpdater != null)
 		{
@@ -137,6 +148,11 @@ public class AgentDirector : MonoBehaviour {
 //		Debug.Log("Times:    "+timeAB+", "+timeBC+", "+timeCD+", "+timeDE+", "+timeEF);
 //		Debug.Log("AvgTimes: "+avgAB+", "+avgBC+", "+avgCD+", "+avgDE+", "+avgEF);
 //		Debug.Log("Percents: "+(avgAB/total)+", "+(avgBC/total)+", "+(avgCD/total)+", "+(avgDE/total)+", "+(avgEF/total));
+
+		if(worldMap.getLivingCount() == 0)
+		{
+			buildWorld();
+		}
 	}
 	
 	private void updateParameters()
@@ -265,20 +281,5 @@ public class AgentDirector : MonoBehaviour {
 	}
 	
 	#endregion Getters/Setters
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
-	#region Camera Helpers
-
-	// This should probably be located in another class that manages camera
-	// and screen events
-	private void configureCamera()
-	{
-//		Camera.main.transform.position = new Vector3(worldWidth/2.0f, worldHeight/2.0f, -10.0f);
-		Camera.main.transform.position = Vector3.zero;
-		Camera.main.orthographicSize = worldHeight/2.0f;
-	}
-
-	#endregion Camera Helpers
 	//////////////////////////////////////////////////////////////////
 }
