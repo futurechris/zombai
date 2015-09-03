@@ -72,7 +72,7 @@ public class WorldMap
 
 			// For now just letting these be redundant
 			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+yDim);
-			Rect tempRect = new Rect(xPos,yPos, xDim,yDim);
+			Rect tempRect = new Rect(xPos,yPos, xDim, yDim);
 
 			buildingTree.Insert(tempRect, ref tempQuad);
 			structures.Add( tempRect );

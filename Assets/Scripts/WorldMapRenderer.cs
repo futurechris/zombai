@@ -8,12 +8,12 @@ public class WorldMapRenderer : MonoBehaviour {
 	#region Parameters & properties
 	private int minimumStreetWidth = 5;
 	
-	public GameObject agentsGO;		// object agents are placed under - just organizational
-	public GameObject structuresGO;	// ditto for structures
+	public GameObject 		agentsGO;		// object agents are placed under - just organizational
+	public GameObject 		structuresGO;	// ditto for structures
 	
-	public GameObject agentPrefab;
-	public GameObject structurePrefab;
-	
+	public GameObject 		agentPrefab;
+	public GameObject 		structurePrefab;
+
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,18 @@ public class WorldMapRenderer : MonoBehaviour {
 //	void Start(){}
 	// Update is called once per frame
 //	void Update(){}
+
+	public void purge()
+	{
+		for(int i=agentsGO.transform.childCount-1; i>=0; i--)
+		{
+			Destroy(agentsGO.transform.GetChild(i).gameObject);
+		}
+		for(int i=structuresGO.transform.childCount-1; i>=0; i--)
+		{
+			Destroy(structuresGO.transform.GetChild(i).gameObject);
+		}
+	}
 	#endregion MonoBehaviour methods & helpers
 	//////////////////////////////////////////////////////////////////
 
