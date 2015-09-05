@@ -31,7 +31,7 @@ public class SimControlHandler : MonoBehaviour {
 			multiplier *= multiplier;
 		}
 
-		simSpeedLabel.text = string.Format("Simulation Speed: {0,-3:N1}x", Mathf.Ceil(10.0f*multiplier)/10.0f);
+		simSpeedLabel.text = string.Format("{0,-3:N1}x", Mathf.Ceil(10.0f*multiplier)/10.0f);
 		simSpeedLabel.SetAllDirty();
 
 //		map.setSimulationSpeed(multiplier);
