@@ -75,7 +75,6 @@ namespace QuadTree
         {
             branchPool = new Stack<Branch>();
             leafPool = new Stack<Leaf>();
-            Branch.tempPool = new Stack<List<Leaf>>();
         }
 
         /// <summary>
@@ -261,8 +260,6 @@ namespace QuadTree
 
         internal class Branch
         {
-            internal static Stack<List<Leaf>> tempPool = new Stack<List<Leaf>>();
-
             internal QuadTree<T> Tree;
             internal Branch Parent;
             internal Quad[] Quads = new Quad[4];
