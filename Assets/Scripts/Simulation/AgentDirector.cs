@@ -18,6 +18,8 @@ public class AgentDirector : MonoBehaviour {
 	public int initUndeadCount = 1;
 	public int initCorpseCount = 0;
 
+	public bool resetWhenAllDead = true;
+
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
 	private int	_targetFramerate = 15; // fps
 	public 	int targetFramerate  = 15;
@@ -71,7 +73,7 @@ public class AgentDirector : MonoBehaviour {
 			mapRenderer.purge();
 		}
 		worldMap = new WorldMap(worldWidth,worldHeight,buildingCount);
-		worldMap.populateWorld(initLivingCount,initCorpseCount,initUndeadCount);
+		List<Agent> population = worldMap.populateWorld(initLivingCount,initCorpseCount,initUndeadCount);
 		
 		mapRenderer.setWorldMap(worldMap);
 		mapRenderer.instantiateWorld();
@@ -89,6 +91,23 @@ public class AgentDirector : MonoBehaviour {
 		float timeA = Time.realtimeSinceStartup;
 		// 0. Update parameters
 		updateParameters();
+
+		if(Input.GetKeyDown(KeyCode.Z))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(0,0,1));
+			worldMap.updateAgentTree();
+		}
+		if(Input.GetKeyDown(KeyCode.H))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(1,0,0));
+			worldMap.updateAgentTree();
+		}
+		if(Input.GetKeyDown(KeyCode.C))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(0,1,0));
+			worldMap.updateAgentTree();
+		}
+
 
 		// 1. If world is paused, exit early
 		if(paused)
@@ -149,7 +168,7 @@ public class AgentDirector : MonoBehaviour {
 //		Debug.Log("AvgTimes: "+avgAB+", "+avgBC+", "+avgCD+", "+avgDE+", "+avgEF);
 //		Debug.Log("Percents: "+(avgAB/total)+", "+(avgBC/total)+", "+(avgCD/total)+", "+(avgDE/total)+", "+(avgEF/total));
 
-		if(worldMap.getLivingCount() == 0)
+		if(worldMap.getLivingCount() == 0 && resetWhenAllDead)
 		{
 			buildWorld();
 		}
@@ -205,7 +224,11 @@ public class AgentDirector : MonoBehaviour {
 	// given a duration of movement.
 	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
 	{
+		float intendedDistance = Vector2.Distance(agent.getLocation(), target);
 		float netSpeedMultiplier = duration * moveSpeed * simulationSpeed * agent.getSpeedMultiplier();
+
+		netSpeedMultiplier = Mathf.Clamp(netSpeedMultiplier, netSpeedMultiplier, intendedDistance);
+
 		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * netSpeedMultiplier;
 		
 		if(worldMap.isValidPosition(newPoint))

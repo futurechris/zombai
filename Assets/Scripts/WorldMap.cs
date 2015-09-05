@@ -8,9 +8,13 @@ public class WorldMap
 	//////////////////////////////////////////////////////////////////
 	#region Parameters & properties
 
-	private int minimumStreetWidth = 5;
-	private int agentTreeSplit = 50;
-	private int buildingTreeSplit = 10;
+	private int minimumStreetWidth 	= 5;
+
+	private int agentTreeSplit 		= 50;
+	private int agentDepthLimit 	= 15;
+
+	private int buildingTreeSplit 	= 100;
+	private int buildingDepthLimit 	= 15;
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -18,8 +22,8 @@ public class WorldMap
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
 	
-	private List<Agent> agents = new List<Agent>();
 	private QuadTree<Agent> agentTree;
+	private List<Agent> agents 	= new List<Agent>();
 	private List<int> workUnits = new List<int>();
 
 	// Obv. just a PH, but this is a list of the rectangular (axis-aligned) rectangular buildings
@@ -27,13 +31,13 @@ public class WorldMap
 	private List<Rect> structures = new List<Rect>();
 	private QuadTree<Rect> buildingTree;
 
-	private float worldWidth = 0;
-	private float worldHeight = 0;
+	private float worldWidth 	= 0;
+	private float worldHeight 	= 0;
 
 	private bool agentStateChanged = true;
-	private int livingCount = 0;
-	private int undeadCount = 0;
-	private int corpseCount = 0;
+	private int livingCount 	= 0;
+	private int undeadCount 	= 0;
+	private int corpseCount 	= 0;
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -54,8 +58,8 @@ public class WorldMap
 		worldWidth = mapWidth;
 		worldHeight = mapHeight;
 
-		agentTree = new QuadTree<Agent>(agentTreeSplit, 0, 0, worldWidth, worldHeight);
-		buildingTree = new QuadTree<Rect>(buildingTreeSplit, 0, 0, worldWidth, worldHeight);
+		agentTree = new QuadTree<Agent>(agentTreeSplit, agentDepthLimit, 0, 0, worldWidth, worldHeight);
+		buildingTree = new QuadTree<Rect>(buildingTreeSplit, buildingDepthLimit, 0, 0, worldWidth, worldHeight);
 
 		// Probably get something closer to a city by carving streets out 
 		//   rather than trying to fill with boxes.
@@ -72,20 +76,22 @@ public class WorldMap
 
 			// For now just letting these be redundant
 			Quad tempQuad = new Quad(xPos, yPos, xPos+xDim, yPos+yDim);
-			Rect tempRect = new Rect(xPos,yPos, xDim, yDim);
+			Rect tempRect = new Rect(xPos, yPos, xDim, 		yDim);
 
 			buildingTree.Insert(tempRect, ref tempQuad);
-			structures.Add( tempRect );
+			structures.Add(tempRect);
 		}
 	}
 
 	// Create agents, give them behaviors and locations, turn them loose.
-	public void populateWorld(int numLiving, int numCorpses, int numUndead)
+	public List<Agent> populateWorld(int numLiving, int numCorpses, int numUndead)
 	{
 		Agent tempAgent;
 
 		AgentBehavior tempAgentBehavior;
 		FallThroughBehavior tempFTB;
+
+		List<Agent> newAgents = new List<Agent>();
 
 		for(int i=0; i<numLiving; i++)
 		{
@@ -93,6 +99,7 @@ public class WorldMap
 			tempAgent.setLocation(getValidAgentPosition());
 
 			agents.Add(tempAgent);
+			newAgents.Add(tempAgent);
 
 			livingCount++;
 		}
@@ -103,7 +110,8 @@ public class WorldMap
 			tempAgent.setLocation(getValidAgentPosition());
 
 			agents.Add(tempAgent);
-			
+			newAgents.Add(tempAgent);
+
 			undeadCount++;
 		}
 
@@ -113,10 +121,12 @@ public class WorldMap
 			tempAgent.setLocation(getValidAgentPosition());
 
 			agents.Add(tempAgent);
-			
+			newAgents.Add(tempAgent);
+
 			corpseCount++;
 		}
 		updateAgentTree();
+		return newAgents;
 	}
 
 	private Vector2 getValidAgentPosition()
@@ -163,7 +173,6 @@ public class WorldMap
 	#region Agent-World Interactions
 	
 	// Agent perceives world through this function alone.
-	// N^2 or worse for now, oh well.
 	public List<AgentPercept> getPercepts(Agent agent, float perfectVisionRange)
 	{
 		List<AgentPercept> apList = new List<AgentPercept>();

@@ -51,28 +51,31 @@ public class WorldMapRenderer : MonoBehaviour {
 
 	public void instantiateWorld()
 	{
-		instantiateAgents();
+		instantiateAgents(myWorld.getAgents());
 		instantiateStructures();
 		configureCamera();
 	}
 
-	private void instantiateAgents()
+	public void instantiateAgents(List<Agent> agents)
+	{
+		for(int i=0; i<agents.Count; i++)
+		{
+			instantiateSingleAgent(agents[i], "Agent "+agentsGO.transform.childCount);
+		}
+	}
+
+	private void instantiateSingleAgent(Agent agent, string name)
 	{
 		GameObject tempGO;
 		AgentRenderer tempRenderer;
 
-		List<Agent> agents = myWorld.getAgents();
-
-		for(int i=0; i<agents.Count; i++)
-		{
-			tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
-
-			tempGO.transform.parent = agentsGO.transform;
-			tempGO.name = "Agent "+i;
-
-			tempRenderer = tempGO.GetComponent<AgentRenderer>();
-			tempRenderer.setAgent(agents[i]);
-		}
+		tempGO = GameObject.Instantiate(agentPrefab) as GameObject;
+		
+		tempGO.transform.parent = agentsGO.transform;
+		tempGO.name = name;
+		
+		tempRenderer = tempGO.GetComponent<AgentRenderer>();
+		tempRenderer.setAgent(agent);
 	}
 
 	private void instantiateStructures()
