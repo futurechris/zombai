@@ -117,16 +117,24 @@ public class WorldMapRenderer : MonoBehaviour {
 		// So calculate screen aspect ratio and world aspect ratio
 		float screenAspectRatio = (float)Screen.width 		/ (float)Screen.height;
 		float worldAspectRatio 	= (float)myWorld.getWidth()	/ (float)myWorld.getHeight();
-		
-		float calcHeight = myWorld.getHeight();
-		if(screenAspectRatio < worldAspectRatio)
+
+		bool fitToHeight = true;
+		if(worldAspectRatio > screenAspectRatio)
 		{
-			calcHeight /= screenAspectRatio;
+			fitToHeight = false;
 		}
-		// all other cases are handled automatically by calculating ortho from worldheight
-		
-		// ortho size is half target height, whatever that came out to be.
-		Camera.main.orthographicSize = calcHeight/2.0f;
+
+		float size = 1.0f;
+		if(fitToHeight)
+		{
+			size = (float)myWorld.getHeight() / 2.0f;
+		}
+		else
+		{
+			size = (float)myWorld.getWidth() / (2.0f * screenAspectRatio);
+		}
+
+		Camera.main.orthographicSize = size;
 		Camera.main.transform.position = new Vector3(myWorld.getWidth()/2.0f, myWorld.getHeight()/2.0f, -10.0f);
 	}
 	
