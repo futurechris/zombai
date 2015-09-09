@@ -33,6 +33,8 @@ public class AgentDirector : MonoBehaviour {
 	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
 	private float perfectVisionRange = 2.0f;
 
+	private float coincidentRange = 0.0001f;
+
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
 
@@ -268,9 +270,18 @@ public class AgentDirector : MonoBehaviour {
 	
 	private void turnAgentTowards(Agent agent, Vector2 point)
 	{
-		Vector2 delta = point - agent.getLocation()/* - point*/;
+		Vector2 delta = point - agent.getLocation();
+		if(delta.magnitude < coincidentRange)
+		{
+			return;
+		}
 		float angle = (90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y));
-		
+
+		if(angle == 90)
+		{
+			Debug.Log("90: Points "+point+" and "+agent.getLocation()+", delta: "+delta);
+		}
+
 		turnAgentTo( agent, angle );
 	}
 	
