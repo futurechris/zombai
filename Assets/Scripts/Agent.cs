@@ -139,17 +139,22 @@ public class Agent
 		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
 		setSightRange(25.0f);
-		setFieldOfView(120.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		// General Zombie:
 		tempFTB.addBehavior( new ZombifyBehavior() );
 		tempFTB.addBehavior( new PursueBehavior() );
 		tempFTB.addBehavior( new NecrophageBehavior() );
 		tempFTB.addBehavior( new WanderBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() );
+		setFieldOfView(120.0f);
 
+		// Boid Zombies
+//		tempFTB.addBehavior( new BoidsBehavior());
+//		tempFTB.addBehavior( new WanderBehavior() );
+//		setFieldOfView(351.0f); // add a "tail wedge" to show direction, until something better is in
 		
 		setBehavior(tempFTB);
 	}

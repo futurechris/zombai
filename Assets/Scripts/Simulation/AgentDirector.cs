@@ -10,30 +10,41 @@ public class AgentDirector : MonoBehaviour {
 	public OverlayUpdater overlayUpdater;
 	public WorldMapRenderer mapRenderer;
 
-	public int worldWidth = 1024;
-	public int worldHeight = 768;
-	public int buildingCount = 100;
+	public int worldWidth 				= 1024;
+	public int worldHeight 				= 768;
+	public int buildingCount 			= 100;
 
-	public int initLivingCount = 1000;
-	public int initUndeadCount = 1;
-	public int initCorpseCount = 0;
+	public int initLivingCount 			= 1000;
+	public int initUndeadCount 			= 1;
+	public int initCorpseCount 			= 0;
 
-	public bool resetWhenAllDead = true;
+	public bool resetWhenAllDead 		= true;
 
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
-	private int	_targetFramerate = 15; // fps
-	public 	int targetFramerate  = 15;
+	private int	_targetFramerate 		= 15; // fps
+	public 	int targetFramerate  		= 15;
 	
 	// how many pixels should be moved per second for an agent on the go.
-	private float moveSpeed = 10.0f;
+	private float moveSpeed 			= 10.0f;
 	
 	// general sim multiplier - currently just another multiplier on moveSpeed
-	private float simulationSpeed = 1.0f;
+	private float simulationSpeed 		= 1.0f;
 	
 	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
-	private float perfectVisionRange = 2.0f;
+	private float perfectVisionRange 	= 2.0f;
 
-	private float coincidentRange = 0.0001f;
+	private float coincidentRange 		= 0.0001f;
+
+	// boids params
+	public float separationWeight 		= 1.0f;
+	public float alignmentWeight 		= 1.0f;
+	public float cohesionWeight 		= 1.0f;
+	public float separationThreshold 	= 15.0f; // distance inside which separation weight triggers
+	public float globalTargetWeight				= 1.0f;
+
+	public int changeEvery				= 0;
+	private int getCount				= 0;
+	public Vector2 globalTarget			= Vector2.zero;
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -312,6 +323,42 @@ public class AgentDirector : MonoBehaviour {
 	public void setSimulationSpeed(float newSimSpeed)
 	{
 		simulationSpeed = newSimSpeed;
+	}
+
+	public float getSeparationWeight()
+	{
+		return separationWeight;
+	}
+	public float getAlignmentWeight()
+	{
+		return alignmentWeight;
+	}
+	public float getCohesionWeight()
+	{
+		return cohesionWeight;
+	}
+	public float getSeparationThreshold()
+	{
+		return separationThreshold;
+	}
+
+	public Vector2 getGlobalTarget()
+	{
+		if(changeEvery > 0)
+		{
+			if(getCount >= changeEvery)
+			{
+				getCount = 0;
+				globalTarget = new Vector2(Random.Range(0,worldWidth), Random.Range(0,worldHeight));
+			}
+		}
+		getCount++;
+		return globalTarget;
+	}
+
+	public float getGlobalTargetWeight()
+	{
+		return globalTargetWeight;
 	}
 	
 	#endregion Getters/Setters
