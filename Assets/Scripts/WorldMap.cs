@@ -199,6 +199,7 @@ public class WorldMap
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
 				tempPercept.locOne 	= nearbyAgents[i].getLocation();
 				tempPercept.living 	= nearbyAgents[i].getIsAlive();
+				tempPercept.facingDirection = nearbyAgents[i].getDirection();
 
 				// TODO: Agent object should not be part of percept, fix!
 				// See AgentPercept.perceivedAgent for more.

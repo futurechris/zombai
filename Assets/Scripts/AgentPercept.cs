@@ -13,6 +13,8 @@ public class AgentPercept
 	public Vector2 locOne = Vector2.zero;
 	public Vector2 locTwo = Vector2.zero;
 
+	public float facingDirection = 0.0f;
+
 	// I don't like exposing this here - not only is a percept
 	// not always an agent, but the whole point of this class
 	// is that agents only have partial knowledge/perception,
