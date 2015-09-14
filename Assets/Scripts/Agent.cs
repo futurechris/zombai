@@ -41,6 +41,7 @@ public class Agent
 	private float sightRange				= 0.0f;
 
 	private float speedMultiplier			= 1.0f;
+	private float turnSpeedMultiplier		= 1.0f;
 
 	// This is *definitely* going to need iteration. :P
 	private bool moveInUse					= false;
@@ -304,6 +305,15 @@ public class Agent
 	public void setSpeedMultiplier(float newMult)
 	{
 		speedMultiplier = newMult;
+	}
+
+	public float getTurnSpeedMultipler()
+	{
+		return turnSpeedMultiplier;
+	}
+	public void setTurnSpeedMultiplier(float newMult)
+	{
+		turnSpeedMultiplier = newMult;
 	}
 
 	public bool getMoveInUse()

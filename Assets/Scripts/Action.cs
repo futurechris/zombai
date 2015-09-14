@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Action
 {
-	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_BY_DEGREES, TURN_TOWARDS,
+	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_TOWARDS,
 							 CONVERT };
 
 	private ActionType actionType = ActionType.STAY;
@@ -39,8 +39,6 @@ public class Action
 	{
 		switch(actionType)
 		{
-			case ActionType.TURN_BY_DEGREES:
-				return true;
 			case ActionType.TURN_TO_DEGREES:
 				return true;
 			case ActionType.TURN_TOWARDS:

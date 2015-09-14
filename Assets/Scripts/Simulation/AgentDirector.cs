@@ -26,6 +26,8 @@ public class AgentDirector : MonoBehaviour {
 	
 	// how many pixels should be moved per second for an agent on the go.
 	private float moveSpeed 			= 10.0f;
+	// how many degrees should be turned per second baseline
+	private float turnSpeed				= 60.0f;
 	
 	// general sim multiplier - currently just another multiplier on moveSpeed
 	private float simulationSpeed 		= 1.0f;
@@ -40,7 +42,7 @@ public class AgentDirector : MonoBehaviour {
 	public float alignmentWeight 		= 1.0f;
 	public float cohesionWeight 		= 1.0f;
 	public float separationThreshold 	= 15.0f; // distance inside which separation weight triggers
-	public float globalTargetWeight				= 1.0f;
+	public float globalTargetWeight		= 1.0f;
 
 	public int changeEvery				= 0;
 	private int getCount				= 0;
@@ -214,16 +216,12 @@ public class AgentDirector : MonoBehaviour {
 					moveAgentTowards( agent, planList[i].getTargetPoint(), duration);
 					break;
 					
-				case Action.ActionType.TURN_BY_DEGREES:
-					turnAgentBy( agent, planList[i].getDirection());
-					break;
-					
 				case Action.ActionType.TURN_TO_DEGREES:
-					turnAgentTo( agent, planList[i].getDirection());
+					turnAgentTo( agent, planList[i].getDirection(), duration);
 					break;
 					
 				case Action.ActionType.TURN_TOWARDS:
-					turnAgentTowards( agent, planList[i].getTargetPoint());
+					turnAgentTowards( agent, planList[i].getTargetPoint(), duration);
 					break;
 					
 				case Action.ActionType.CONVERT:
@@ -268,32 +266,24 @@ public class AgentDirector : MonoBehaviour {
 			}
 		}
 	}
-	
-	private void turnAgentBy(Agent agent, float degrees)
+
+	private void turnAgentTo(Agent agent, float newAngle, float duration)
 	{
-		agent.setDirection( agent.getDirection() + degrees );
+		agent.setDirection( 
+			Mathf.MoveTowardsAngle(agent.getDirection(), newAngle, turnSpeed*duration*agent.getTurnSpeedMultipler())
+		                  );
 	}
 	
-	private void turnAgentTo(Agent agent, float angle)
-	{
-		agent.setDirection( angle );
-	}
-	
-	private void turnAgentTowards(Agent agent, Vector2 point)
+	private void turnAgentTowards(Agent agent, Vector2 point, float duration)
 	{
 		Vector2 delta = point - agent.getLocation();
 		if(delta.magnitude < coincidentRange)
 		{
 			return;
 		}
-		float angle = (90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y));
+		float newAngle = (90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y));
 
-		if(angle == 90)
-		{
-			Debug.Log("90: Points "+point+" and "+agent.getLocation()+", delta: "+delta);
-		}
-
-		turnAgentTo( agent, angle );
+		turnAgentTo( agent, newAngle, duration );
 	}
 	
 	private Vector2 nearestDirect(Vector2 start, Vector2 stop, float incrementPercent)
