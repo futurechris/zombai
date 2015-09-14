@@ -129,6 +129,41 @@ public class WorldMap
 		return newAgents;
 	}
 
+	public List<Agent> spawnOne(Agent.AgentType type, Vector2 pos)
+	{
+		List<Agent> newAgent = new List<Agent>();
+
+		// for now just ignore spawns in buildings.
+		if(!isValidPosition(pos))
+		{
+			return newAgent;
+		}
+
+		Agent tempAgent;
+		tempAgent = new Agent(type);
+		tempAgent.setLocation(pos);
+
+		agents.Add(tempAgent);
+		newAgent.Add(tempAgent);
+
+		switch(type)
+		{
+			case Agent.AgentType.HUMAN:
+				livingCount++;
+				break;
+			case Agent.AgentType.ZOMBIE:
+				undeadCount++;
+				break;
+			case Agent.AgentType.CORPSE:
+				corpseCount++;
+				break;
+			default:
+				break;
+		}
+		updateAgentTree();
+		return newAgent;
+	}
+
 	private Vector2 getValidAgentPosition()
 	{
 		Vector2 testPos = new Vector2(Random.Range(0.0f,worldWidth), Random.Range(0.0f,worldHeight));

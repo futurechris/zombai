@@ -197,6 +197,12 @@ public class AgentDirector : MonoBehaviour {
 		}
 	}
 
+	public void spawnAgent(Agent.AgentType type, Vector2 pos)
+	{
+		mapRenderer.instantiateAgents(worldMap.spawnOne(type, pos));
+		worldMap.updateAgentTree();
+	}
+
 	#endregion MonoBehavior methods & helpers
 	//////////////////////////////////////////////////////////////////
 
