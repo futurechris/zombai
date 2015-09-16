@@ -15,11 +15,11 @@ public class UserInput : MonoBehaviour, IPointerClickHandler {
 	{
 		if(e.button == PointerEventData.InputButton.Left)
 		{
-			FindObjectOfType<AgentDirector>().spawnAgent(Agent.AgentType.HUMAN, Camera.main.ScreenToWorldPoint(e.position));
+			FindObjectOfType<AgentDirector>().spawnAgent(Agent.AgentType.ZOMBIE, Camera.main.ScreenToWorldPoint(e.position));
 		}
 		else if(e.button == PointerEventData.InputButton.Right)
 		{
-			FindObjectOfType<AgentDirector>().spawnAgent(Agent.AgentType.ZOMBIE, Camera.main.ScreenToWorldPoint(e.position));
+			FindObjectOfType<AgentDirector>().spawnAgent(Agent.AgentType.HUMAN, Camera.main.ScreenToWorldPoint(e.position));
 		}
 		else if(e.button == PointerEventData.InputButton.Middle)
 		{
