@@ -22,7 +22,7 @@ public class ActionArbiter {
 	//////////////////////////////////////////////////////////////////
 	#region Arbitration parameters
 
-	private float convertDistance = 2.0f;
+	// Nothing here for now
 
 	#endregion Arbitration parameters
 	//////////////////////////////////////////////////////////////////
@@ -62,11 +62,6 @@ public class ActionArbiter {
 		queuedActions.Add(new ActionParameters(initiator,target,verb));
 	}
 
-	public float getConvertDistance()
-	{
-		return convertDistance;
-	}
-
 	public void setWorldMap(WorldMap newMap)
 	{
 		map = newMap;
@@ -83,7 +78,8 @@ public class ActionArbiter {
 	{
 		float distance = Vector2.Distance(action.subject.getLocation(),
 		                                  action.directObject.getLocation());
-		if( distance <= convertDistance )
+
+		if( distance <= action.subject.getConvertRange() )
 		{
 			// TODO: Is conversion guaranteed? Perhaps some just die, become corpses?
 			// certainly possible to get multiple zombies attempting to convert in one cycle

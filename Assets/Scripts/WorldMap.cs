@@ -129,6 +129,11 @@ public class WorldMap
 		return newAgents;
 	}
 
+	public List<Agent> spawnOne(Agent.AgentType type)
+	{
+		return spawnOne(type, getValidAgentPosition());
+	}
+
 	public List<Agent> spawnOne(Agent.AgentType type, Vector2 pos)
 	{
 		List<Agent> newAgent = new List<Agent>();
@@ -151,7 +156,13 @@ public class WorldMap
 			case Agent.AgentType.HUMAN:
 				livingCount++;
 				break;
+			case Agent.AgentType.HUMAN_PLAYER:
+				livingCount++;
+				break;
 			case Agent.AgentType.ZOMBIE:
+				undeadCount++;
+				break;
+			case Agent.AgentType.ZOMBIE_PLAYER:
 				undeadCount++;
 				break;
 			case Agent.AgentType.CORPSE:

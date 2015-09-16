@@ -17,7 +17,7 @@ public class ZombifyBehavior : AgentBehavior {
 		if(found)
 		{
 			float preyDistance = Vector2.Distance(myself.getLocation(), tempAgent.getLocation());
-			if(preyDistance < ActionArbiter.Instance.getConvertDistance())
+			if(preyDistance < myself.getConvertRange())
 			{
 				newAction = new Action(Action.ActionType.CONVERT);
 				newAction.setTargetAgent(tempAgent);

@@ -21,7 +21,7 @@ public class NecrophageBehavior : AgentBehavior
 		{
 			float distance = Vector2.Distance(myself.getLocation(),tempAgent.getLocation());
 
-			if(distance < ActionArbiter.Instance.getConvertDistance()*necrophageRadiusMultiplier)
+			if(distance < myself.getConvertRange()*necrophageRadiusMultiplier)
 			{
 				newMoveAction = new Action(Action.ActionType.STAY);
 			}

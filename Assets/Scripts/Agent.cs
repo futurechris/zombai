@@ -8,11 +8,13 @@ public class Agent
 	#region Agent Types/Defaults
 	// Regularly used agent types to speed up initialization
 	// and enable conversion between agent types
-	public enum AgentType { CUSTOM, HUMAN, ZOMBIE, CORPSE };
+	public enum AgentType { CUSTOM, HUMAN, ZOMBIE, CORPSE, HUMAN_PLAYER, ZOMBIE_PLAYER };
 
 	private static Color humanColor = Color.green;
 	private static Color zombieColor = Color.red;
 	private static Color corpseColor = Color.cyan;
+	private static Color humanPlayerColor = Color.yellow;
+	private static Color zombiePlayerColor = Color.magenta;
 
 	#endregion Agent Types/Defaults
 	//////////////////////////////////////////////////////////////////
@@ -39,6 +41,7 @@ public class Agent
 	private float direction					= 0.0f;
 	private float fieldOfView				= 0.0f;
 	private float sightRange				= 0.0f;
+	private float convertRange				= 0.0f;
 
 	private float speedMultiplier			= 1.0f;
 	private float turnSpeedMultiplier		= 1.0f;
@@ -96,8 +99,14 @@ public class Agent
 			case AgentType.HUMAN:
 				configureAsHuman();
 				break;
+			case AgentType.HUMAN_PLAYER:
+				configureAsPlayableHuman();
+				break;
 			case AgentType.ZOMBIE:
 				configureAsZombie();
+				break;
+			case AgentType.ZOMBIE_PLAYER:
+				configureAsPlayableZombie();
 				break;
 		}
 	}
@@ -135,6 +144,22 @@ public class Agent
 		setBehavior(tempFTB);
 	}
 
+	private void configureAsPlayableHuman()
+	{
+		setAgentColor(humanPlayerColor);
+		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setSightRange(49.0f); // longer range to help with reaction time
+		setFieldOfView(210.0f); // slightly expanded vision range, same
+		setDirection(Random.Range(-180.0f, 180.0f));
+		setSpeedMultiplier(1.25f); // and slightly faster
+		
+		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new PlayerControlBehavior() );
+		tempFTB.addBehavior( new RandomLookBehavior() ); // leaving this in for now, useful.
+		
+		setBehavior(tempFTB);
+	}
+
 	private void configureAsZombie()
 	{
 		setAgentColor(zombieColor);
@@ -142,6 +167,7 @@ public class Agent
 		setSightRange(25.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.0f);
+		setConvertRange(2.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		// General Zombie:
@@ -159,6 +185,26 @@ public class Agent
 		
 		setBehavior(tempFTB);
 	}
+
+	private void configureAsPlayableZombie()
+	{
+		setAgentColor(zombieColor);
+		setIsAlive(AgentPercept.LivingState.UNDEAD);
+		setSightRange(36.0f); // slightly expanded, to account for reaction time and lack of overwhelming numbers
+		setFieldOfView(180.0f); // super zombie
+		setDirection(Random.Range(-180.0f, 180.0f));
+		setSpeedMultiplier(1.15f); // same as a human
+		setConvertRange(5.0f); // significant boost, to help account for lag/control timing
+		
+		FallThroughBehavior tempFTB = new FallThroughBehavior();
+		tempFTB.addBehavior( new ZombifyBehavior() );
+		tempFTB.addBehavior( new PlayerControlBehavior() );
+		tempFTB.addBehavior( new RandomLookBehavior() );
+		
+		setBehavior(tempFTB);
+	}
+	
+
 
 	private void configureDefault()
 	{
@@ -334,6 +380,14 @@ public class Agent
 		lookInUse = newUseState;
 	}
 
+	public float getConvertRange()
+	{
+		return convertRange;
+	}
+	public void setConvertRange(float newRange)
+	{
+		convertRange = newRange;
+	}
 	#endregion MonoBehaviour methods
 	//////////////////////////////////////////////////////////////////
 }

@@ -18,6 +18,8 @@ public class AgentDirector : MonoBehaviour {
 	public int initUndeadCount 			= 1;
 	public int initCorpseCount 			= 0;
 
+	public bool spawnPlayerAgent		= false;
+
 	public bool resetWhenAllDead 		= true;
 
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
@@ -97,6 +99,11 @@ public class AgentDirector : MonoBehaviour {
 		if(overlayUpdater != null)
 		{
 			overlayUpdater.map = worldMap;
+		}
+
+		if(spawnPlayerAgent)
+		{
+			spawnAgent(Agent.AgentType.HUMAN_PLAYER);
 		}
 	}
 	
@@ -197,6 +204,11 @@ public class AgentDirector : MonoBehaviour {
 		}
 	}
 
+	public void spawnAgent(Agent.AgentType type)
+	{
+		mapRenderer.instantiateAgents(worldMap.spawnOne(type));
+		worldMap.updateAgentTree();
+	}
 	public void spawnAgent(Agent.AgentType type, Vector2 pos)
 	{
 		mapRenderer.instantiateAgents(worldMap.spawnOne(type, pos));

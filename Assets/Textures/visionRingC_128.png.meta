@@ -51,6 +51,10 @@ TextureImporter:
     maxTextureSize: 2048
     textureFormat: -3
     compressionQuality: 50
+  - buildTarget: iPhone
+    maxTextureSize: 2048
+    textureFormat: -3
+    compressionQuality: 50
   spriteSheet:
     sprites: []
   spritePackingTag: 
