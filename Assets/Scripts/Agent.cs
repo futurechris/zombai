@@ -149,9 +149,10 @@ public class Agent
 		setAgentColor(humanPlayerColor);
 		setIsAlive(AgentPercept.LivingState.ALIVE);
 		setSightRange(49.0f); // longer range to help with reaction time
-		setFieldOfView(210.0f); // slightly expanded vision range, same
+		setFieldOfView(135.0f); // slightly expanded vision range, same
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.25f); // and slightly faster
+		setTurnSpeedMultiplier(2.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		tempFTB.addBehavior( new PlayerControlBehavior() );
@@ -165,6 +166,7 @@ public class Agent
 		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
 		setSightRange(25.0f);
+		setFieldOfView(120.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.0f);
 		setConvertRange(2.0f);
@@ -176,7 +178,6 @@ public class Agent
 		tempFTB.addBehavior( new NecrophageBehavior() );
 		tempFTB.addBehavior( new WanderBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() );
-		setFieldOfView(120.0f);
 
 		// Boid Zombies
 //		tempFTB.addBehavior( new BoidsBehavior());
@@ -191,9 +192,10 @@ public class Agent
 		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
 		setSightRange(36.0f); // slightly expanded, to account for reaction time and lack of overwhelming numbers
-		setFieldOfView(180.0f); // super zombie
+		setFieldOfView(135.0f); // super zombie
 		setDirection(Random.Range(-180.0f, 180.0f));
 		setSpeedMultiplier(1.15f); // same as a human
+		setTurnSpeedMultiplier(2.0f); // just a lot more responsive this way
 		setConvertRange(5.0f); // significant boost, to help account for lag/control timing
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();

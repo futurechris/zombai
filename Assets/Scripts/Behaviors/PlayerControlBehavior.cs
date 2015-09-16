@@ -12,8 +12,25 @@ public class PlayerControlBehavior : AgentBehavior
 			return false;
 		}
 		
-		Action newMoveAction;
-		Action newLookAction;
+		Action newMoveAction = null;
+		Action newLookAction = null;
+
+		// unlike other behaviors, for responsiveness, this should always clear immediately
+		this.currentPlans.Clear();
+
+		Vector2 lookVector = Vector2.zero;
+		Vector2 moveVector = Vector2.zero;
+
+		if(!myself.getLookInUse())
+		{
+			float hLookAxis = Input.GetAxis("LookHorizontal");
+			float vLookAxis = Input.GetAxis("LookVertical");
+
+			if(hLookAxis != 0 || vLookAxis != 0)
+			{
+				lookVector = new Vector2(hLookAxis, vLookAxis);
+			}
+		}
 
 		if(!myself.getMoveInUse())
 		{
@@ -22,23 +39,33 @@ public class PlayerControlBehavior : AgentBehavior
 
 			if(hAxis != 0 || vAxis != 0)
 			{
-				Vector2 targetPoint = myself.getLocation()+new Vector2(hAxis/2.0f, vAxis/2.0f);
-				Vector2 lookTowards = Vector2.zero;
-				
-				newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
-				newMoveAction.setTargetPoint(targetPoint);
-				
-				newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
-				newLookAction.setTargetPoint(targetPoint);
-				
-				this.currentPlans.Clear();
-				this.currentPlans.Add(newMoveAction);
-				this.currentPlans.Add(newLookAction);
-				return true;
+				moveVector = new Vector2(hAxis/2.0f, vAxis/2.0f);
 			}
-
 		}
-		
-		return false;
+
+		if(moveVector != Vector2.zero)
+		{
+			newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
+			newMoveAction.setTargetPoint(myself.getLocation() + moveVector);
+			this.currentPlans.Add(newMoveAction);
+		}
+		if(lookVector != Vector2.zero)
+		{
+			newLookAction = new Action(Action.ActionType.TURN_TO_DEGREES);
+			Vector2 netVector = lookVector;
+			float angle = 90.0f - Mathf.Rad2Deg * Mathf.Atan2(netVector.x, netVector.y);
+
+			newLookAction.setDirection(angle);
+			this.currentPlans.Add(newLookAction);
+		}
+		else if(moveVector != Vector2.zero)
+		{
+			// if no specific look input, turn in the direction we're moving
+			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
+			newLookAction.setTargetPoint(myself.getLocation() + moveVector);
+			this.currentPlans.Add(newLookAction);
+		}
+
+		return (currentPlans.Count > 0);
 	}
 }
