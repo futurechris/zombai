@@ -34,6 +34,7 @@ public class Agent
 	// Several of these wouldn't "const" correctly, so for now non-DRYly
 	// duplicating the 'defaults' down in configureDefault()
 	private AgentPercept.LivingState living	= AgentPercept.LivingState.ALIVE;
+	private AgentType agentType				= AgentType.HUMAN;
 	private AgentBehavior behavior			= new NoopBehavior();
 	private Color agentColor				= Color.cyan;
 
@@ -113,13 +114,15 @@ public class Agent
 
 	private void configureAsCustom()
 	{
-		// for now, nothing?
+		setAgentType(AgentType.CUSTOM);
 	}
 
 	private void configureAsCorpse()
 	{
 		setAgentColor(corpseColor);
 		setIsAlive(AgentPercept.LivingState.DEAD);
+		setAgentType(AgentType.CORPSE);
+
 		setSightRange(0.0f);
 		setFieldOfView(0.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
@@ -131,6 +134,7 @@ public class Agent
 	{
 		setAgentColor(humanColor);
 		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setAgentType(AgentType.HUMAN);
 		setSightRange(36.0f);
 		setFieldOfView(180.0f); // roughly full range of vision
 		setDirection(Random.Range(-180.0f, 180.0f));
@@ -148,6 +152,7 @@ public class Agent
 	{
 		setAgentColor(humanPlayerColor);
 		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setAgentType(AgentType.HUMAN_PLAYER);
 		setSightRange(49.0f); // longer range to help with reaction time
 		setFieldOfView(135.0f); // slightly expanded vision range, same
 		setDirection(Random.Range(-180.0f, 180.0f));
@@ -165,6 +170,7 @@ public class Agent
 	{
 		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
+		setAgentType(AgentType.ZOMBIE);
 		setSightRange(25.0f);
 		setFieldOfView(120.0f);
 		setDirection(Random.Range(-180.0f, 180.0f));
@@ -191,6 +197,7 @@ public class Agent
 	{
 		setAgentColor(zombieColor);
 		setIsAlive(AgentPercept.LivingState.UNDEAD);
+		setAgentType(AgentType.ZOMBIE_PLAYER);
 		setSightRange(36.0f); // slightly expanded, to account for reaction time and lack of overwhelming numbers
 		setFieldOfView(135.0f); // super zombie
 		setDirection(Random.Range(-180.0f, 180.0f));
@@ -211,27 +218,20 @@ public class Agent
 	private void configureDefault()
 	{
 		setIsAlive(AgentPercept.LivingState.ALIVE);
+		setAgentType(AgentType.HUMAN);
 		setBehavior(new NoopBehavior());
 		setAgentColor(humanColor);
 
 		setDirection(0.0f);
 		setFieldOfView(0.0f);
 		setSightRange(0.0f);
-		
+		setConvertRange(0.0f);
+
 		setSpeedMultiplier(1.0f);
+		setTurnSpeedMultiplier(1.0f);
 
 		setMoveInUse(false);
 		setLookInUse(false);
-
-		// Not sure if this one should be part of defaults...
-		// The intended use of configureDefault() is to remove agent
-		// customizations that may no longer apply. E.g., if some human is
-		// "well-rested" when they die, they might have a higher speed multiplier.
-		// That doesn't necessarily carry through zombification, so we would want
-		// to remove it.
-		// But that doesn't mean they need to be teleported to Vector2.zero.
-//		setLocation(Vector2.zero);
-
 	}
 
 	#endregion Agent type definitions
@@ -271,6 +271,15 @@ public class Agent
 	public void setIsAlive(AgentPercept.LivingState newState)
 	{
 		living = newState;
+	}
+
+	public AgentType getAgentType()
+	{
+		return agentType;
+	}
+	public void setAgentType(AgentType newType)
+	{
+		agentType = newType;
 	}
 
 	public AgentBehavior getBehavior()
