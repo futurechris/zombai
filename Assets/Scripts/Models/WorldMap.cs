@@ -31,6 +31,9 @@ public class WorldMap
 	private List<Rect> structures = new List<Rect>();
 	private QuadTree<Rect> buildingTree;
 
+	private List<WorldObject> worldObjects = new List<WorldObject>();
+	// no need for QuadTree here just yet
+
 	private float worldWidth 	= 0;
 	private float worldHeight 	= 0;
 
@@ -38,6 +41,7 @@ public class WorldMap
 	private int livingCount 	= 0;
 	private int undeadCount 	= 0;
 	private int corpseCount 	= 0;
+	private int survivorCount	= 0;
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -175,6 +179,31 @@ public class WorldMap
 		return newAgent;
 	}
 
+	public List<WorldObject> placeWorldObject(WorldObject.ObjectType objType)
+	{
+		// TODO: Create a different function for computing valid places for a given object type
+		return placeWorldObject(objType, getValidAgentPosition());
+	}
+
+	public List<WorldObject> placeWorldObject(WorldObject.ObjectType objType, Vector2 pos)
+	{
+		List<WorldObject> objList = new List<WorldObject>();
+
+		if(!isValidPosition(pos))
+		{
+			return objList;
+		}
+
+		WorldObject tempObject;
+		tempObject = new WorldObject(objType);
+		tempObject.Location = pos;
+		
+		worldObjects.Add(tempObject);
+		objList.Add(tempObject);
+
+		return objList;
+	}
+
 	private Vector2 getValidAgentPosition()
 	{
 		Vector2 testPos = new Vector2(Random.Range(0.0f,worldWidth), Random.Range(0.0f,worldHeight));
@@ -244,7 +273,7 @@ public class WorldMap
 				tempPercept 		= new AgentPercept();
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
 				tempPercept.locOne 	= nearbyAgents[i].getLocation();
-				tempPercept.living 	= nearbyAgents[i].getIsAlive();
+				tempPercept.living 	= nearbyAgents[i].getLivingState();
 				tempPercept.facingDirection = nearbyAgents[i].getDirection();
 
 				// TODO: Agent object should not be part of percept, fix!
@@ -268,6 +297,24 @@ public class WorldMap
 				apList.AddRange(structureList);
 			}
 			structureList = null;
+		}
+
+		// TODO: Work out a smarter way to handle WorldObjects than point-based
+		if(agent.getAgentType() == Agent.AgentType.HUMAN || agent.getAgentType() == Agent.AgentType.HUMAN_PLAYER)
+		{
+			for(int wo=0; wo<worldObjects.Count; wo++)
+			{
+				if(canPerceivePosition(agent, worldObjects[wo].Location, perfectVisionRange))
+				{
+					tempPercept = new AgentPercept();
+					tempPercept.type = AgentPercept.PerceptType.EXTRACT;
+					tempPercept.locOne = worldObjects[wo].Location;
+					tempPercept.living = AgentPercept.LivingState.INANIMATE;
+					
+					apList.Add(tempPercept);
+					tempPercept = null;
+				}
+			}
 		}
 
 		return apList;
@@ -306,6 +353,14 @@ public class WorldMap
 	{
 		// TODO: Calculate chunks of walls that are visible, return those.
 		return null;
+	}
+
+	public void extractAgent(Agent who)
+	{
+		agents.Remove(who);
+		updateAgentTree();
+		who.extractSuccess();
+		survivorCount++;
 	}
 
 
@@ -354,6 +409,11 @@ public class WorldMap
 	public int getCorpseCount()
 	{
 		return corpseCount;
+	}
+
+	public int getSurvivorCount()
+	{
+		return survivorCount;
 	}
 
 	public void agentCountChange(int deltaLiving, int deltaUndead, int deltaCorpse)

@@ -62,10 +62,6 @@ public class Agent
 	public Agent(AgentType newType)
 	{
 		configureAs(newType,true);
-		if(myRenderer != null)
-		{
-			myRenderer.recalculateFOVImage();
-		}
 	}
 
 	#endregion MonoBehaviour methods
@@ -161,6 +157,7 @@ public class Agent
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		tempFTB.addBehavior( new PlayerControlBehavior() );
+		tempFTB.addBehavior( new ExtractionBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() ); // leaving this in for now, useful.
 		
 		setBehavior(tempFTB);
@@ -238,6 +235,17 @@ public class Agent
 	//////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////
+	#region Agent state updates
+
+	public void extractSuccess()
+	{
+		myRenderer.gameObject.SetActive(false);
+	}
+
+	#endregion AAgent state updates
+	//////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////
 	#region Getter/Setters
 	// Many of these may be fine as properties, but I'm expecting some/all to grow complex.
 
@@ -264,7 +272,7 @@ public class Agent
 		}
 	}
 
-	public AgentPercept.LivingState getIsAlive()
+	public AgentPercept.LivingState getLivingState()
 	{
 		return living;
 	}

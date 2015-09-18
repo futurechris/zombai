@@ -42,7 +42,7 @@ public class AgentBehavior
 			{
 				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
 				
-				if( tempDistance < targetDistance && (percepts[i].perceivedAgent!=null))
+				if( tempDistance < targetDistance)
 				{
 					targetDistance = tempDistance;
 					targetPosition = percepts[i].locOne;

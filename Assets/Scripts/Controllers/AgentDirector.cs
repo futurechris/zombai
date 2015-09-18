@@ -129,6 +129,10 @@ public class AgentDirector : MonoBehaviour {
 			mapRenderer.instantiateAgents(worldMap.populateWorld(0,1,0));
 			worldMap.updateAgentTree();
 		}
+		if(Input.GetKeyDown(KeyCode.E))
+		{
+			mapRenderer.instantiateObjects(worldMap.placeWorldObject(WorldObject.ObjectType.EXTRACT_POINT));
+		}
 
 
 		// 1. If world is paused, exit early
@@ -158,8 +162,8 @@ public class AgentDirector : MonoBehaviour {
 		{
 			// Currently the '1' work unit is meaningless - agents will just do their little
 			// calculation and be done with it.
-			if(		agent.getIsAlive() == AgentPercept.LivingState.ALIVE
-			   || 	agent.getIsAlive() == AgentPercept.LivingState.UNDEAD)
+			if(		agent.getLivingState() == AgentPercept.LivingState.ALIVE
+			   || 	agent.getLivingState() == AgentPercept.LivingState.UNDEAD)
 			{
 				agent.setLookInUse(false);
 				agent.setMoveInUse(false);
@@ -244,6 +248,10 @@ public class AgentDirector : MonoBehaviour {
 					
 				case Action.ActionType.CONVERT:
 					ActionArbiter.Instance.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
+					break;
+
+				case Action.ActionType.EXTRACT:
+					ActionArbiter.Instance.requestAction(agent, agent, ActionArbiter.ActionType.EXTRACT);
 					break;
 			}
 		}

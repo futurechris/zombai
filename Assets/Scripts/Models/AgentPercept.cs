@@ -4,7 +4,7 @@ using System.Collections;
 // Certainly anaemic, but might be enough to learn what we'll really need.
 public class AgentPercept
 {
-	public enum PerceptType { AGENT, WALL };
+	public enum PerceptType { AGENT, WALL, EXTRACT };
 	public enum LivingState { INANIMATE, ALIVE, DEAD, UNDEAD };
 
 	public PerceptType type = PerceptType.WALL;

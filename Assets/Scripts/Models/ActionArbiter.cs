@@ -22,7 +22,9 @@ public class ActionArbiter {
 	//////////////////////////////////////////////////////////////////
 	#region Arbitration parameters
 
-	// Nothing here for now
+	[SerializeField]
+	private float _extractionDistance = 5.0f;
+	public float ExtractionDistance	{ get { return _extractionDistance; } }
 
 	#endregion Arbitration parameters
 	//////////////////////////////////////////////////////////////////
@@ -35,21 +37,36 @@ public class ActionArbiter {
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
 
-	public enum ActionType { CONVERT };
+	public enum ActionType { CONVERT, EXTRACT };
 
 	private List<ActionParameters> queuedActions = new List<ActionParameters>();
 
 	//////////////////////////////////////////////////////////////////
 	#region Interface
 
+	// Order of actions determines which take precedence
+	// e.g. currently, if you get Converted at the same time you're trying
+	// to get Extracted, no luck. You're a zombie/corpse.
 	public void resolveActions()
 	{
+		// priority 1 actions like Convert
 		foreach(ActionParameters action in queuedActions)
 		{
 			switch( action.verb )
 			{
 				case ActionType.CONVERT:
 					attemptConvert(action);
+					break;
+			}
+		}
+
+		// priority 2 actions like Extract
+		foreach(ActionParameters action in queuedActions)
+		{
+			switch( action.verb )
+			{
+				case ActionType.EXTRACT:
+					attemptExtract(action);
 					break;
 			}
 		}
@@ -84,7 +101,7 @@ public class ActionArbiter {
 			// TODO: Is conversion guaranteed? Perhaps some just die, become corpses?
 			// certainly possible to get multiple zombies attempting to convert in one cycle
 			// so, prevent that
-			if(action.directObject.getIsAlive() == AgentPercept.LivingState.ALIVE)
+			if(action.directObject.getLivingState() == AgentPercept.LivingState.ALIVE)
 			{	
 				action.directObject.configureAs(Agent.AgentType.ZOMBIE, true);
 				if(map != null)
@@ -92,6 +109,15 @@ public class ActionArbiter {
 					map.agentCountChange(-1,1,0);
 				}
 			}
+		}
+	}
+
+	private void attemptExtract(ActionParameters action)
+	{
+		// for now we assume you're in range
+		if(action.subject.getLivingState() == AgentPercept.LivingState.ALIVE)
+		{
+			map.extractAgent(action.subject);
 		}
 	}
 

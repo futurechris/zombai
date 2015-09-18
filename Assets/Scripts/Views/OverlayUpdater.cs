@@ -9,7 +9,7 @@ public class OverlayUpdater : MonoBehaviour {
 	public Text	livingCount;
 	public Text undeadCount;
 	public Text corpseCount;
-
+	public Text survivorCount;
 
 	// Use this for initialization
 	void Start () {
@@ -36,6 +36,9 @@ public class OverlayUpdater : MonoBehaviour {
 
 			corpseCount.text = "Dead: "+map.getCorpseCount();
 			corpseCount.SetAllDirty();
+
+			survivorCount.text = "Survived: "+map.getSurvivorCount();
+			survivorCount.SetAllDirty();
 		}
 	}
 

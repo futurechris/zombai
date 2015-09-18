@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class ZombifyBehavior : AgentBehavior {
-	
-	// TODO: Decide what faculties this behavior uses.
+
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		// If you're within ActionArbiter.convertDistance of a brain, try to grab't!
+		// If you're within convertRange of a brain, try to grab't!
 		// Can only grab one though, so grab the closest one.
 		Action newAction;
 		

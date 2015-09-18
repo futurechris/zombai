@@ -4,7 +4,7 @@ using System.Collections;
 public class Action
 {
 	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_TOWARDS,
-							 CONVERT };
+							 CONVERT, EXTRACT };
 
 	private ActionType actionType = ActionType.STAY;
 
@@ -30,6 +30,10 @@ public class Action
 				return true;
 			case ActionType.MOVE_TOWARDS:
 				return true;
+			case ActionType.CONVERT:
+				return false; // forcing them to stop moving would make convert much less reliable
+			case ActionType.EXTRACT:
+				return true; // basically a movement action, and extract point shouldn't be a moving target
 			default:
 				return false;
 		}

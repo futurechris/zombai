@@ -10,9 +10,11 @@ public class WorldMapRenderer : MonoBehaviour {
 	
 	public GameObject 		agentsGO;		// object agents are placed under - just organizational
 	public GameObject 		structuresGO;	// ditto for structures
+	public GameObject		worldObjectsGO;
 	
 	public GameObject 		agentPrefab;
 	public GameObject 		structurePrefab;
+	public GameObject		worldObjectPrefab; // weird to have singular prefab for this, change later.
 
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
@@ -62,6 +64,28 @@ public class WorldMapRenderer : MonoBehaviour {
 		{
 			instantiateSingleAgent(agents[i], "Agent "+agentsGO.transform.childCount);
 		}
+	}
+
+	public void instantiateObjects(List<WorldObject> wObjs)
+	{
+		for(int i=0; i<wObjs.Count; i++)
+		{
+			instantiateSingleObject(wObjs[i]);
+		}
+	}
+
+	private void instantiateSingleObject(WorldObject newObj)
+	{
+		GameObject tempGO;
+		WorldObjectRenderer tempRenderer;
+
+		tempGO = GameObject.Instantiate(worldObjectPrefab) as GameObject;
+
+		tempGO.transform.SetParent(worldObjectsGO.transform);
+		tempGO.name = newObj.WorldObjectType + " " + worldObjectsGO.transform.childCount;
+
+		tempRenderer = tempGO.GetComponent<WorldObjectRenderer>();
+		tempRenderer.setObject(newObj);
 	}
 
 	private void instantiateSingleAgent(Agent agent, string name)
