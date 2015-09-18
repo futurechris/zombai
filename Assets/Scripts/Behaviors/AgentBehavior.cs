@@ -23,19 +23,22 @@ public class AgentBehavior
 		currentPlans.Clear();
 		return true;
 	}
-
-	protected bool findNearestAgent(List<AgentPercept> percepts, AgentPercept.LivingState livingType, out Agent foundAgent)
+	
+	protected bool findNearestPercept(List<AgentPercept> percepts, 
+	                                  AgentPercept.LivingState livingType,
+	                                  AgentPercept.PerceptType perceptType,
+	                                  out AgentPercept nearest)
 	{
 		float targetDistance = float.MaxValue;
 		Vector2 targetPosition = Vector2.zero;
-
+		
 		float tempDistance = 0.0f;
-
-		foundAgent = null;
-
+		
+		nearest = null;
+		
 		for(int i=0; i<percepts.Count; i++)
 		{
-			if(percepts[i].living == livingType )
+			if(percepts[i].living == livingType && percepts[i].type == perceptType)
 			{
 				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
 				
@@ -43,16 +46,48 @@ public class AgentBehavior
 				{
 					targetDistance = tempDistance;
 					targetPosition = percepts[i].locOne;
-					foundAgent = percepts[i].perceivedAgent;
+					nearest = percepts[i];
 				}
 			}
 		}
-
-		if(foundAgent != null)
+		
+		if(nearest != null)
 		{
 			return true;
 		}
 
+		if(percepts.Count > 0)
+		{
+			// prefer to if-and-assign than to allocate.
+			nearest = percepts[0];
+			return false;
+		}
+
+		nearest = new AgentPercept();
 		return false;
+	}
+
+	protected bool findNearestAgent(List<AgentPercept> percepts, AgentPercept.LivingState livingType, out Agent foundAgent)
+	{
+		AgentPercept resultAgent;
+		bool result = findNearestPercept(percepts, livingType, AgentPercept.PerceptType.AGENT, out resultAgent);
+		if(result)
+		{
+			if(resultAgent.perceivedAgent != null)
+			{
+				foundAgent = resultAgent.perceivedAgent;
+				return true;
+			}
+			else
+			{
+				foundAgent = new Agent();
+				return false;
+			}
+		}
+		else
+		{
+			foundAgent = new Agent();
+			return false;
+		}
 	}
 }
