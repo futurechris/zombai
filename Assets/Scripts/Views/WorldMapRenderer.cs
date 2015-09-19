@@ -22,7 +22,15 @@ public class WorldMapRenderer : MonoBehaviour {
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
 
-	private WorldMap myWorld;
+	private WorldMap _myWorld;
+	public WorldMap WorldMap
+	{ 
+		set
+		{
+			_myWorld = value;
+			configureCamera();
+		}
+	}
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -53,7 +61,7 @@ public class WorldMapRenderer : MonoBehaviour {
 
 	public void instantiateWorld()
 	{
-		instantiateAgents(myWorld.getAgents());
+		instantiateAgents(_myWorld.getAgents());
 		instantiateStructures();
 		configureCamera();
 	}
@@ -104,7 +112,7 @@ public class WorldMapRenderer : MonoBehaviour {
 
 	private void instantiateStructures()
 	{
-		List<Rect> structures = myWorld.getStructures();
+		List<Rect> structures = _myWorld.getStructures();
 		RectTransform tempRT;
 		foreach(Rect rect in structures)
 		{
@@ -124,7 +132,7 @@ public class WorldMapRenderer : MonoBehaviour {
 	#region Getters & Setters
 	public void setWorldMap(WorldMap newWorldMap)
 	{
-		myWorld = newWorldMap;
+		_myWorld = newWorldMap;
 		configureCamera();
 	}
 	#endregion Getters & Setters
@@ -140,7 +148,7 @@ public class WorldMapRenderer : MonoBehaviour {
 		// Fit screen, need to figure out if width or height is the limiting factor
 		// So calculate screen aspect ratio and world aspect ratio
 		float screenAspectRatio = (float)Screen.width 		/ (float)Screen.height;
-		float worldAspectRatio 	= (float)myWorld.getWidth()	/ (float)myWorld.getHeight();
+		float worldAspectRatio 	= (float)_myWorld.getWidth()	/ (float)_myWorld.getHeight();
 
 		bool fitToHeight = true;
 		if(worldAspectRatio > screenAspectRatio)
@@ -151,15 +159,15 @@ public class WorldMapRenderer : MonoBehaviour {
 		float size = 1.0f;
 		if(fitToHeight)
 		{
-			size = (float)myWorld.getHeight() / 2.0f;
+			size = (float)_myWorld.getHeight() / 2.0f;
 		}
 		else
 		{
-			size = (float)myWorld.getWidth() / (2.0f * screenAspectRatio);
+			size = (float)_myWorld.getWidth() / (2.0f * screenAspectRatio);
 		}
 
 		Camera.main.orthographicSize = size;
-		Camera.main.transform.position = new Vector3(myWorld.getWidth()/2.0f, myWorld.getHeight()/2.0f, -10.0f);
+		Camera.main.transform.position = new Vector3(_myWorld.getWidth()/2.0f, _myWorld.getHeight()/2.0f, -10.0f);
 	}
 	
 	#endregion Camera Helpers

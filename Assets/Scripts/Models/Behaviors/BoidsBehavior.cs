@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,7 +15,7 @@ public class BoidsBehavior : AgentBehavior {
 		float separationThreshold = GameObject.FindObjectOfType<AgentDirector>().getSeparationThreshold();
 
 		// global bit is a temporary hack to test boids behavior in the absence of other stimuli
-		Vector2 globalTarget = GameObject.FindObjectOfType<AgentDirector>().getGlobalTarget() - myself.getLocation();
+		Vector2 globalTarget = GameObject.FindObjectOfType<AgentDirector>().getGlobalTarget() - _myself.Location;
 		float globalTargetWeight = GameObject.FindObjectOfType<AgentDirector>().getGlobalTargetWeight();
 
 
@@ -23,7 +23,7 @@ public class BoidsBehavior : AgentBehavior {
 		// make sure there's a nearby agent to respond to
 		bool found = findNearestAgent(percepts, AgentPercept.LivingState.UNDEAD, out tempAgent);
 
-		if(found && !myself.getMoveInUse() && !myself.getLookInUse())
+		if(found && !_myself.MoveInUse && !_myself.LookInUse)
 		{
 			Vector2 separationVector = calculateSeparationVector(percepts,allottedWorkUnits, separationThreshold);
 			Vector2 alignmentVector = calculateAlignmentVector(percepts,allottedWorkUnits);
@@ -37,10 +37,10 @@ public class BoidsBehavior : AgentBehavior {
 
 
 			newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
-			newMoveAction.setTargetPoint(myself.getLocation()+moveVector);
+			newMoveAction.TargetPoint = (_myself.Location+moveVector);
 		
 			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
-			newLookAction.setTargetPoint(myself.getLocation()+moveVector);
+			newLookAction.TargetPoint = (_myself.Location+moveVector);
 
 
 			currentPlans.Clear();
@@ -61,12 +61,12 @@ public class BoidsBehavior : AgentBehavior {
 		{
 			if(percepts[i].living == AgentPercept.LivingState.UNDEAD )
 			{
-				float tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
+				float tempDistance = Vector2.Distance(percepts[i].locOne, _myself.Location);
 				
 				if( tempDistance < separationThreshold )
 				{
 					// Following the "mirror delta" approach for Rule 2 here: http://www.vergenet.net/~conrad/boids/pseudocode.html
-					result += myself.getLocation() - percepts[i].locOne;
+					result += _myself.Location - percepts[i].locOne;
 				}
 			}
 		}
@@ -126,7 +126,7 @@ public class BoidsBehavior : AgentBehavior {
 		}
 
 
-		return (result / agentCount) - myself.getLocation();
+		return (result / agentCount) - _myself.Location;
 	}
 
 	/*

@@ -17,22 +17,22 @@ public class NecrophageBehavior : AgentBehavior
 		Agent tempAgent;
 		bool found = findNearestAgent(percepts, AgentPercept.LivingState.DEAD, out tempAgent);
 		
-		if(found && !myself.getMoveInUse() && !myself.getLookInUse())
+		if(found && !_myself.MoveInUse && !_myself.LookInUse)
 		{
-			float distance = Vector2.Distance(myself.getLocation(),tempAgent.getLocation());
+			float distance = Vector2.Distance(_myself.Location,tempAgent.Location);
 
-			if(distance < myself.getConvertRange()*necrophageRadiusMultiplier)
+			if(distance < _myself.ConvertRange*necrophageRadiusMultiplier)
 			{
 				newMoveAction = new Action(Action.ActionType.STAY);
 			}
 			else
 			{
 				newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
-				newMoveAction.setTargetPoint(tempAgent.getLocation());
+				newMoveAction.TargetPoint = (tempAgent.Location);
 			}
 
 			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
-			newLookAction.setTargetPoint(tempAgent.getLocation());
+			newLookAction.TargetPoint = (tempAgent.Location);
 
 			currentPlans.Clear();
 			this.currentPlans.Add(newMoveAction);

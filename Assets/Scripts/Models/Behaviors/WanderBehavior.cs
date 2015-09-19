@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,7 +15,7 @@ public class WanderBehavior : AgentBehavior
 	
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(myself.getMoveInUse())
+		if(_myself.MoveInUse)
 		{
 			return false;
 		}
@@ -53,7 +53,7 @@ public class WanderBehavior : AgentBehavior
 		float targetY = distance * Mathf.Sin(a);
 		
 		Action newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-		newAction.setTargetPoint(myself.getLocation() + new Vector2(targetX,targetY));
+		newAction.TargetPoint = (_myself.Location + new Vector2(targetX,targetY));
 		
 		this.currentPlans.Add(newAction);
 		

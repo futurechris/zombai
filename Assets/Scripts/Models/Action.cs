@@ -6,25 +6,52 @@ public class Action
 	public enum ActionType { STAY, MOVE_TOWARDS, TURN_TO_DEGREES, TURN_TOWARDS,
 							 CONVERT, EXTRACT };
 
-	private ActionType actionType = ActionType.STAY;
+	//////////////////////////////////////////////////////////////
+	#region Properties (Parameters)
+	// Each action will use whichever of these are appropriate
 
-	private Vector2 targetPoint = Vector2.zero;
-	private float   direction	= 0.0f;
-	private Agent	targetAgent = null;
+	[SerializeField]
+	private ActionType _type = ActionType.STAY;
+	public ActionType Type { get { return _type; } set { _type = value; } }
+	
+	[SerializeField]
+	private Vector2 _targetPoint = Vector2.zero;
+	public Vector2 TargetPoint { get { return _targetPoint; } set { _targetPoint = value; } }
+
+	[SerializeField]
+	private float   _direction	= 0.0f;
+	public float Direction
+	{
+		get { return _direction; } 
+		set { 
+			_direction = value;
+			// clean mod
+			if(_direction < 0)
+			{
+				_direction += 360.0f;
+			}
+			if(_direction >= 360.0f)
+			{
+				_direction -= 360.0f;
+			}
+		}
+	}
+
+	[SerializeField]
+	private Agent	_targetAgent = null;
+	public Agent TargetAgent { get { return _targetAgent; } set { _targetAgent = value; } }
+
+	#endregion Properties (Parameters)
+	//////////////////////////////////////////////////////////////
 
 	public Action(ActionType newActionType=ActionType.STAY)
 	{
-		actionType = newActionType;
-	}
-
-	public ActionType getActionType()
-	{
-		return actionType;
+		Type = newActionType;
 	}
 
 	public bool getUsingMove()
 	{
-		switch(actionType)
+		switch(Type)
 		{
 			case ActionType.STAY:
 				return true;
@@ -41,7 +68,7 @@ public class Action
 
 	public bool getUsingLook()
 	{
-		switch(actionType)
+		switch(Type)
 		{
 			case ActionType.TURN_TO_DEGREES:
 				return true;
@@ -51,50 +78,4 @@ public class Action
 				return false;
 		}
 	}
-
-	//////////////////////////////////////////////////////////////////
-	#region Action parameter settings
-	// Each action will use whichever of these are appropriate
-
-	public void setTargetPoint(Vector2 newTarget)
-	{
-		targetPoint = newTarget;
-	}
-
-	public Vector2 getTargetPoint()
-	{
-		return targetPoint;
-	}
-
-	public void setDirection(float radians)
-	{
-		direction = radians;
-		// clean mod
-		if(direction < 0)
-		{
-			direction += 360.0f;
-		}
-		if(direction >= 360.0f)
-		{
-			direction -= 360.0f;
-		}
-	}
-
-	public float getDirection()
-	{
-		return direction;
-	}
-
-	public void setTargetAgent(Agent newTarget)
-	{
-		targetAgent = newTarget;
-	}
-
-	public Agent getTargetAgent()
-	{
-		return targetAgent;
-	}
-
-	#endregion Action parameter settings
-	//////////////////////////////////////////////////////////////////
 }

@@ -31,8 +31,10 @@ public class ActionArbiter {
 
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
-	
-	private WorldMap map = null;
+
+	[SerializeField]
+	private WorldMap _map = null;
+	public WorldMap WorldMap { set { _map = value; } }
 	
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -79,11 +81,6 @@ public class ActionArbiter {
 		queuedActions.Add(new ActionParameters(initiator,target,verb));
 	}
 
-	public void setWorldMap(WorldMap newMap)
-	{
-		map = newMap;
-	}
-
 	#endregion Interface
 	//////////////////////////////////////////////////////////////////
 
@@ -93,20 +90,20 @@ public class ActionArbiter {
 
 	private void attemptConvert(ActionParameters action)
 	{
-		float distance = Vector2.Distance(action.subject.getLocation(),
-		                                  action.directObject.getLocation());
+		float distance = Vector2.Distance(action.subject.Location,
+		                                  action.directObject.Location);
 
-		if( distance <= action.subject.getConvertRange() )
+		if( distance <= action.subject.ConvertRange )
 		{
 			// TODO: Is conversion guaranteed? Perhaps some just die, become corpses?
 			// certainly possible to get multiple zombies attempting to convert in one cycle
 			// so, prevent that
-			if(action.directObject.getLivingState() == AgentPercept.LivingState.ALIVE)
+			if(action.directObject.LivingState == AgentPercept.LivingState.ALIVE)
 			{	
 				action.directObject.configureAs(Agent.AgentType.ZOMBIE, true);
-				if(map != null)
+				if(_map != null)
 				{
-					map.agentCountChange(-1,1,0);
+					_map.agentCountChange(-1,1,0);
 				}
 			}
 		}
@@ -115,9 +112,9 @@ public class ActionArbiter {
 	private void attemptExtract(ActionParameters action)
 	{
 		// for now we assume you're in range
-		if(action.subject.getLivingState() == AgentPercept.LivingState.ALIVE)
+		if(action.subject.LivingState == AgentPercept.LivingState.ALIVE)
 		{
-			map.extractAgent(action.subject);
+			_map.extractAgent(action.subject);
 		}
 	}
 

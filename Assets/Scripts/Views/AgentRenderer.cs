@@ -32,18 +32,18 @@ public class AgentRenderer : MonoBehaviour {
 	public void setAgent(Agent newAgent)
 	{
 		agent = newAgent;
-		agent.setRenderer(this);
+		agent.Renderer = (this);
 		fullUpdate();
 	}
 
 	public void updateColor()
 	{
-		agentSprite.color = agent.getAgentColor();
+		agentSprite.color = agent.AgentColor;
 	}
 
 	public void updateLocation()
 	{
-		this.transform.localPosition = agent.getLocation();
+		this.transform.localPosition = agent.Location;
 	}
 
 	public void updateFOVScale()
@@ -52,7 +52,7 @@ public class AgentRenderer : MonoBehaviour {
 		{
 			return;
 		}
-		float multiplier = agent.getSightRange() / fovMultiplier;
+		float multiplier = agent.SightRange / fovMultiplier;
 		fovImage.rectTransform.localScale = new Vector3(multiplier, multiplier, 1.0f);
 		fovImage.SetAllDirty();
 	}
@@ -81,12 +81,12 @@ public class AgentRenderer : MonoBehaviour {
 		}
 		// The prefab for agents sets the 'fill origin' as being to the right. Fill is clockwise.
 		// % to fill is easy, just the percentage of a circle represented by fieldOfView.
-		fovImage.fillAmount = agent.getFieldOfView() / 360.0f;
+		fovImage.fillAmount = agent.FieldOfView / 360.0f;
 		
 		// angle then is direction-half that?
 		fovImage.rectTransform.rotation = Quaternion.identity; // reset rotation
-		fovImage.rectTransform.Rotate(0.0f, 0.0f, (agent.getDirection() + (agent.getFieldOfView()/2.0f)));
-		fovImage.color = agent.getAgentColor();
+		fovImage.rectTransform.Rotate(0.0f, 0.0f, (agent.Direction + (agent.FieldOfView/2.0f)));
+		fovImage.color = agent.AgentColor;
 
 		fovImage.SetAllDirty();
 	}

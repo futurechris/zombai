@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,7 +7,7 @@ public class FleeBehavior : AgentBehavior
 	// flee from nearest undead
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(myself.getMoveInUse())
+		if(_myself.MoveInUse)
 		{
 			return false;
 		}
@@ -17,11 +17,11 @@ public class FleeBehavior : AgentBehavior
 		Agent nearestEnemy;
 		bool found = findNearestAgent(percepts, AgentPercept.LivingState.UNDEAD, out nearestEnemy);
 		
-		if(found && !myself.getMoveInUse())
+		if(found && !_myself.MoveInUse)
 		{
-			Vector2 mirror = myself.getLocation() + (myself.getLocation() - nearestEnemy.getLocation());
+			Vector2 mirror = _myself.Location + (_myself.Location - nearestEnemy.Location);
 			newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-			newAction.setTargetPoint(mirror);
+			newAction.TargetPoint = (mirror);
 
 			this.currentPlans.Clear();
 			this.currentPlans.Add(newAction);

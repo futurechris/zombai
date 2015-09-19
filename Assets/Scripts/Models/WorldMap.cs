@@ -100,7 +100,7 @@ public class WorldMap
 		for(int i=0; i<numLiving; i++)
 		{
 			tempAgent = new Agent(Agent.AgentType.HUMAN);
-			tempAgent.setLocation(getValidAgentPosition());
+			tempAgent.Location = (getValidAgentPosition());
 
 			agents.Add(tempAgent);
 			newAgents.Add(tempAgent);
@@ -111,7 +111,7 @@ public class WorldMap
 		for(int i=0; i<numUndead; i++)
 		{	
 			tempAgent = new Agent(Agent.AgentType.ZOMBIE);
-			tempAgent.setLocation(getValidAgentPosition());
+			tempAgent.Location = (getValidAgentPosition());
 
 			agents.Add(tempAgent);
 			newAgents.Add(tempAgent);
@@ -122,7 +122,7 @@ public class WorldMap
 		for(int i=0; i<numCorpses; i++)
 		{	
 			tempAgent = new Agent(Agent.AgentType.CORPSE);
-			tempAgent.setLocation(getValidAgentPosition());
+			tempAgent.Location = (getValidAgentPosition());
 
 			agents.Add(tempAgent);
 			newAgents.Add(tempAgent);
@@ -150,7 +150,7 @@ public class WorldMap
 
 		Agent tempAgent;
 		tempAgent = new Agent(type);
-		tempAgent.setLocation(pos);
+		tempAgent.Location = (pos);
 
 		agents.Add(tempAgent);
 		newAgent.Add(tempAgent);
@@ -255,8 +255,8 @@ public class WorldMap
 		AgentPercept tempPercept;
 
 		List<Agent> nearbyAgents = new List<Agent>();
-		Vector2 loc = agent.getLocation();
-		float radius = agent.getSightRange();
+		Vector2 loc = agent.Location;
+		float radius = agent.SightRange;
 		Quad visibleArea = new Quad( loc.x-radius, loc.y-radius, loc.x+radius, loc.y+radius );
 
 		agentTree.SearchArea(visibleArea, ref nearbyAgents);
@@ -264,17 +264,17 @@ public class WorldMap
 		for(int i=0; i<nearbyAgents.Count; i++)
 		{
 			// For now not doing self-aware. No Skynet on *my* watch!
-			if(agent.getGuid() == nearbyAgents[i].getGuid())
+			if(agent.Guid == nearbyAgents[i].Guid)
 			{
 				continue;
 			}
-			if(canPerceivePosition(agent, nearbyAgents[i].getLocation(), perfectVisionRange))
+			if(canPerceivePosition(agent, nearbyAgents[i].Location, perfectVisionRange))
 			{
 				tempPercept 		= new AgentPercept();
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
-				tempPercept.locOne 	= nearbyAgents[i].getLocation();
-				tempPercept.living 	= nearbyAgents[i].getLivingState();
-				tempPercept.facingDirection = nearbyAgents[i].getDirection();
+				tempPercept.locOne 	= nearbyAgents[i].Location;
+				tempPercept.living 	= nearbyAgents[i].LivingState;
+				tempPercept.facingDirection = nearbyAgents[i].Direction;
 
 				// TODO: Agent object should not be part of percept, fix!
 				// See AgentPercept.perceivedAgent for more.
@@ -300,7 +300,7 @@ public class WorldMap
 		}
 
 		// TODO: Work out a smarter way to handle WorldObjects than point-based
-		if(agent.getAgentType() == Agent.AgentType.HUMAN || agent.getAgentType() == Agent.AgentType.HUMAN_PLAYER)
+		if(agent.Type == Agent.AgentType.HUMAN || agent.Type == Agent.AgentType.HUMAN_PLAYER)
 		{
 			for(int wo=0; wo<worldObjects.Count; wo++)
 			{
@@ -323,9 +323,9 @@ public class WorldMap
 	public bool canPerceivePosition(Agent who, Vector2 where, float perfectVisionRange)
 	{
 		// first, distance between who and where: <= vision distance?
-		Vector2 delta = where - who.getLocation();
+		Vector2 delta = where - who.Location;
 		
-		if( delta.magnitude > who.getSightRange())
+		if( delta.magnitude > who.SightRange)
 		{
 			return false;
 		}
@@ -339,9 +339,9 @@ public class WorldMap
 		// second: calculate angle between who and where, compare to
 		//		   agent's facing, see if it's within FOV
 		float whoToWhereAngle = 90 - Mathf.Rad2Deg * Mathf.Atan2(delta.x, delta.y);
-		float shortest = Mathf.Abs(Mathf.DeltaAngle(whoToWhereAngle, who.getDirection()));
+		float shortest = Mathf.Abs(Mathf.DeltaAngle(whoToWhereAngle, who.Direction));
 
-		if(shortest <= (who.getFieldOfView()/2.0f))
+		if(shortest <= (who.FieldOfView/2.0f))
 		{
 			return true;
 		}
@@ -377,7 +377,7 @@ public class WorldMap
 		agentTree.Clear();
 		for(int i=0; i<agents.Count; i++)
 		{
-			agentTree.Insert(agents[i],agents[i].getLocation().x, agents[i].getLocation().y, 0,0);
+			agentTree.Insert(agents[i],agents[i].Location.x, agents[i].Location.y, 0,0);
 		}
 	}
 	#endregion Tree Helpers

@@ -15,8 +15,11 @@ public class WorldObject
 	#region Bookkeeping
 	private	System.Guid guid				= System.Guid.NewGuid();
 	private bool needsInitialization		= true;
-	
-	private WorldObjectRenderer myRenderer;
+
+	[SerializeField]
+	private WorldObjectRenderer _myRenderer;
+	public WorldObjectRenderer Renderer { set { _myRenderer = value; } }
+
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
 
@@ -75,16 +78,5 @@ public class WorldObject
 	private void configureAsExtractPoint(){}
 
 	#endregion Object Type Definitions
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
-	#region Getters & Setters
-
-	public void setRenderer(WorldObjectRenderer wor)
-	{
-		myRenderer = wor;
-	}
-
-	#endregion Getters & Setters
 	//////////////////////////////////////////////////////////////////
 }

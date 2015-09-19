@@ -6,16 +6,12 @@ public class AgentBehavior
 {
 	protected List<Action> currentPlans = new List<Action>();
 
-	protected Agent myself;
+	[SerializeField]
+	protected Agent _myself;
 
 	public List<Action> getCurrentPlans()
 	{
 		return currentPlans;
-	}
-
-	public virtual void setAgent(Agent newAgent)
-	{
-		myself = newAgent;
 	}
 
 	public virtual bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
@@ -40,7 +36,7 @@ public class AgentBehavior
 		{
 			if(percepts[i].living == livingType && percepts[i].type == perceptType)
 			{
-				tempDistance = Vector2.Distance(percepts[i].locOne, myself.getLocation());
+				tempDistance = Vector2.Distance(percepts[i].locOne, _myself.Location);
 				
 				if( tempDistance < targetDistance)
 				{
@@ -89,5 +85,10 @@ public class AgentBehavior
 			foundAgent = new Agent();
 			return false;
 		}
+	}
+
+	public virtual void setAgent(Agent newAgent)
+	{
+		_myself = newAgent;
 	}
 }

@@ -27,17 +27,18 @@ public class AgentDirector : MonoBehaviour {
 	public 	int targetFramerate  		= 15;
 	
 	// how many pixels should be moved per second for an agent on the go.
-	private float moveSpeed 			= 10.0f;
+	private float _moveSpeed 			= 10.0f;
+
 	// how many degrees should be turned per second baseline
-	private float turnSpeed				= 60.0f;
+	private float _turnSpeed			= 60.0f;
 	
 	// general sim multiplier - currently just another multiplier on moveSpeed
-	private float simulationSpeed 		= 1.0f;
+	private float _simulationSpeed 		= 1.0f;
 	
 	// within this range, agent FOVs are 360-degree. Just to smooth out the overlap situation.
-	private float perfectVisionRange 	= 2.0f;
+	private float _perfectVisionRange 	= 2.0f;
 
-	private float coincidentRange 		= 0.0001f;
+	private float _coincidentRange 		= 0.0001f;
 
 	// boids params
 	public float separationWeight 		= 1.0f;
@@ -92,10 +93,10 @@ public class AgentDirector : MonoBehaviour {
 		worldMap = new WorldMap(worldWidth,worldHeight,buildingCount);
 		List<Agent> population = worldMap.populateWorld(initLivingCount,initCorpseCount,initUndeadCount);
 		
-		mapRenderer.setWorldMap(worldMap);
+		mapRenderer.WorldMap = (worldMap);
 		mapRenderer.instantiateWorld();
 		
-		ActionArbiter.Instance.setWorldMap(worldMap);
+		ActionArbiter.Instance.WorldMap = (worldMap);
 		if(overlayUpdater != null)
 		{
 			overlayUpdater.map = worldMap;
@@ -162,12 +163,12 @@ public class AgentDirector : MonoBehaviour {
 		{
 			// Currently the '1' work unit is meaningless - agents will just do their little
 			// calculation and be done with it.
-			if(		agent.getLivingState() == AgentPercept.LivingState.ALIVE
-			   || 	agent.getLivingState() == AgentPercept.LivingState.UNDEAD)
+			if(		agent.LivingState == AgentPercept.LivingState.ALIVE
+			   || 	agent.LivingState == AgentPercept.LivingState.UNDEAD)
 			{
-				agent.setLookInUse(false);
-				agent.setMoveInUse(false);
-				agent.getBehavior().updatePlan( worldMap.getPercepts(agent, perfectVisionRange), 1 );
+				agent.LookInUse = (false);
+				agent.MoveInUse = (false);
+				agent.Behavior.updatePlan( worldMap.getPercepts(agent, _perfectVisionRange), 1 );
 			}
 		}
 		float timeF = Time.realtimeSinceStartup;
@@ -226,28 +227,28 @@ public class AgentDirector : MonoBehaviour {
 	#region Agent Action
 	private void executeAction(Agent agent, float duration)
 	{
-		List<Action> planList = agent.getBehavior().getCurrentPlans();
+		List<Action> planList = agent.Behavior.getCurrentPlans();
 		for(int i=0; i<planList.Count; i++)
 		{
-			switch(planList[i].getActionType())
+			switch(planList[i].Type)
 			{
 				case Action.ActionType.STAY:
 					break;
 					
 				case Action.ActionType.MOVE_TOWARDS:
-					moveAgentTowards( agent, planList[i].getTargetPoint(), duration);
+					moveAgentTowards( agent, planList[i].TargetPoint, duration);
 					break;
 					
 				case Action.ActionType.TURN_TO_DEGREES:
-					turnAgentTo( agent, planList[i].getDirection(), duration);
+					turnAgentTo( agent, planList[i].Direction, duration);
 					break;
 					
 				case Action.ActionType.TURN_TOWARDS:
-					turnAgentTowards( agent, planList[i].getTargetPoint(), duration);
+					turnAgentTowards( agent, planList[i].TargetPoint, duration);
 					break;
 					
 				case Action.ActionType.CONVERT:
-					ActionArbiter.Instance.requestAction(agent, planList[i].getTargetAgent(), ActionArbiter.ActionType.CONVERT);
+					ActionArbiter.Instance.requestAction(agent, planList[i].TargetAgent, ActionArbiter.ActionType.CONVERT);
 					break;
 
 				case Action.ActionType.EXTRACT:
@@ -261,21 +262,21 @@ public class AgentDirector : MonoBehaviour {
 	// given a duration of movement.
 	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
 	{
-		float intendedDistance = Vector2.Distance(agent.getLocation(), target);
-		float netSpeedMultiplier = duration * moveSpeed * simulationSpeed * agent.getSpeedMultiplier();
+		float intendedDistance = Vector2.Distance(agent.Location, target);
+		float netSpeedMultiplier = duration * _moveSpeed * _simulationSpeed * agent.SpeedMultiplier;
 
 		netSpeedMultiplier = Mathf.Clamp(netSpeedMultiplier, netSpeedMultiplier, intendedDistance);
 
-		Vector2 newPoint = agent.getLocation() + (target - agent.getLocation()).normalized * netSpeedMultiplier;
+		Vector2 newPoint = agent.Location + (target - agent.Location).normalized * netSpeedMultiplier;
 		
 		if(worldMap.isValidPosition(newPoint))
 		{
-			agent.setLocation(newPoint);
+			agent.Location = (newPoint);
 		}
 		else
 		{
 			// partial movement & wall-sliding go here
-			Vector2 firstStop = nearestDirect(agent.getLocation(), newPoint, 0.125f);
+			Vector2 firstStop = nearestDirect(agent.Location, newPoint, 0.125f);
 			
 			// in 2D should only have one valid dimension here.
 			// and technically, could get even more accurate by calling nearestDirect again.
@@ -284,26 +285,24 @@ public class AgentDirector : MonoBehaviour {
 			Vector2 yTarget = new Vector2(firstStop.x, newPoint.y);
 			if(worldMap.isValidPosition(xTarget))
 			{
-				agent.setLocation(xTarget);
+				agent.Location = (xTarget);
 			}
 			else if(worldMap.isValidPosition(yTarget))
 			{
-				agent.setLocation(yTarget);
+				agent.Location = (yTarget);
 			}
 		}
 	}
 
 	private void turnAgentTo(Agent agent, float newAngle, float duration)
 	{
-		agent.setDirection( 
-			Mathf.MoveTowardsAngle(agent.getDirection(), newAngle, turnSpeed*duration*agent.getTurnSpeedMultipler())
-		                  );
+		agent.Direction = (Mathf.MoveTowardsAngle(agent.Direction, newAngle, _turnSpeed*duration*agent.TurnSpeedMultiplier));
 	}
 	
 	private void turnAgentTowards(Agent agent, Vector2 point, float duration)
 	{
-		Vector2 delta = point - agent.getLocation();
-		if(delta.magnitude < coincidentRange)
+		Vector2 delta = point - agent.Location;
+		if(delta.magnitude < _coincidentRange)
 		{
 			return;
 		}
@@ -335,10 +334,11 @@ public class AgentDirector : MonoBehaviour {
 
 	//////////////////////////////////////////////////////////////////
 	#region Getters/Setters
+	// leaving these as non-properties for now
 	
 	public void setSimulationSpeed(float newSimSpeed)
 	{
-		simulationSpeed = newSimSpeed;
+		_simulationSpeed = newSimSpeed;
 	}
 
 	public float getSeparationWeight()

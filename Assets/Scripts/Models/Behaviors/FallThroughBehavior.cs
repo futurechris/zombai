@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,7 +9,7 @@ public class FallThroughBehavior : AgentBehavior
 	public void addBehavior(AgentBehavior newBehavior)
 	{
 		behaviorList.Add(newBehavior);
-		newBehavior.setAgent(myself);
+		newBehavior.setAgent(_myself);
 	}
 
 	public AgentBehavior getBehaviorAt(int index)
@@ -24,11 +24,11 @@ public class FallThroughBehavior : AgentBehavior
 
 	public override void setAgent(Agent newAgent)
 	{
-		myself = newAgent;
+		_myself = newAgent;
 
 		for(int i=0; i<this.behaviorList.Count; i++)
 		{
-			behaviorList[i].setAgent(myself);
+			behaviorList[i].setAgent(_myself);
 		}
 	}
 
@@ -49,8 +49,8 @@ public class FallThroughBehavior : AgentBehavior
 				for(int planIdx=0; planIdx<tempPlans.Count; planIdx++)
 				{
 					currentPlans.Add(tempPlans[planIdx]);
-					myself.setLookInUse(myself.getLookInUse() || tempPlans[planIdx].getUsingLook());
-					myself.setMoveInUse(myself.getMoveInUse() || tempPlans[planIdx].getUsingMove());
+					_myself.LookInUse = (_myself.LookInUse || tempPlans[planIdx].getUsingLook());
+					_myself.MoveInUse = (_myself.MoveInUse || tempPlans[planIdx].getUsingMove());
 				}
 			}
 		}

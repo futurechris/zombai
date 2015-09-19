@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -10,7 +10,7 @@ public class RandomLookBehavior : AgentBehavior
 
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(myself.getLookInUse())
+		if(_myself.LookInUse)
 		{
 			return false;
 		}
@@ -23,7 +23,7 @@ public class RandomLookBehavior : AgentBehavior
 
 
 		Action newAction = new Action(Action.ActionType.TURN_TO_DEGREES);
-		newAction.setDirection(Random.Range(-180.0f, 180.0f));
+		newAction.Direction = (Random.Range(-180.0f, 180.0f));
 		
 		currentPlans.Clear();
 		currentPlans.Add(newAction);

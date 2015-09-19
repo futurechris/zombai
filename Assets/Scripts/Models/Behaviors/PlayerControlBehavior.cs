@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,7 +7,7 @@ public class PlayerControlBehavior : AgentBehavior
 	// Get keyboard/touch input and convert it into a "plan"
 	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
 	{
-		if(myself.getMoveInUse())
+		if(_myself.MoveInUse)
 		{
 			return false;
 		}
@@ -21,7 +21,7 @@ public class PlayerControlBehavior : AgentBehavior
 		Vector2 lookVector = Vector2.zero;
 		Vector2 moveVector = Vector2.zero;
 
-		if(!myself.getLookInUse())
+		if(!_myself.LookInUse)
 		{
 			float hLookAxis = Input.GetAxis("LookHorizontal");
 			float vLookAxis = Input.GetAxis("LookVertical");
@@ -32,7 +32,7 @@ public class PlayerControlBehavior : AgentBehavior
 			}
 		}
 
-		if(!myself.getMoveInUse())
+		if(!_myself.MoveInUse)
 		{
 			float hAxis = Input.GetAxis("Horizontal");
 			float vAxis = Input.GetAxis("Vertical");
@@ -46,7 +46,7 @@ public class PlayerControlBehavior : AgentBehavior
 		if(moveVector != Vector2.zero)
 		{
 			newMoveAction = new Action(Action.ActionType.MOVE_TOWARDS);
-			newMoveAction.setTargetPoint(myself.getLocation() + moveVector);
+			newMoveAction.TargetPoint = (_myself.Location + moveVector);
 			this.currentPlans.Add(newMoveAction);
 		}
 		if(lookVector != Vector2.zero)
@@ -55,14 +55,14 @@ public class PlayerControlBehavior : AgentBehavior
 			Vector2 netVector = lookVector;
 			float angle = 90.0f - Mathf.Rad2Deg * Mathf.Atan2(netVector.x, netVector.y);
 
-			newLookAction.setDirection(angle);
+			newLookAction.Direction = (angle);
 			this.currentPlans.Add(newLookAction);
 		}
 		else if(moveVector != Vector2.zero)
 		{
 			// if no specific look input, turn in the direction we're moving
 			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
-			newLookAction.setTargetPoint(myself.getLocation() + moveVector);
+			newLookAction.TargetPoint = (_myself.Location + moveVector);
 			this.currentPlans.Add(newLookAction);
 		}
 

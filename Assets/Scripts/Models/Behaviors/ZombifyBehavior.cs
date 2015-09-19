@@ -15,11 +15,11 @@ public class ZombifyBehavior : AgentBehavior {
 		
 		if(found)
 		{
-			float preyDistance = Vector2.Distance(myself.getLocation(), tempAgent.getLocation());
-			if(preyDistance < myself.getConvertRange())
+			float preyDistance = Vector2.Distance(_myself.Location, tempAgent.Location);
+			if(preyDistance < _myself.ConvertRange)
 			{
 				newAction = new Action(Action.ActionType.CONVERT);
-				newAction.setTargetAgent(tempAgent);
+				newAction.TargetAgent = (tempAgent);
 				
 				this.currentPlans.Clear();
 				this.currentPlans.Add(newAction);

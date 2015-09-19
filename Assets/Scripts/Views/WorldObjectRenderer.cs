@@ -45,7 +45,7 @@ public class WorldObjectRenderer : MonoBehaviour {
 	public void setObject(WorldObject newObject)
 	{
 		worldObject = newObject;
-		worldObject.setRenderer(this);
+		worldObject.Renderer = (this);
 		fullUpdate();
 	}
 

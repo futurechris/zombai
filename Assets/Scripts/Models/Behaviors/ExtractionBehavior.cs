@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,21 +13,21 @@ public class ExtractionBehavior : AgentBehavior {
 		
 		if(found)
 		{
-			float extractDistance = Vector2.Distance(myself.getLocation(), tempPercept.locOne);
+			float extractDistance = Vector2.Distance(_myself.Location, tempPercept.locOne);
 			if(extractDistance < ActionArbiter.Instance.ExtractionDistance)
 			{
 				newAction = new Action(Action.ActionType.EXTRACT);
-				newAction.setTargetPoint(tempPercept.locOne);
+				newAction.TargetPoint = (tempPercept.locOne);
 				
 				this.currentPlans.Clear();
 				this.currentPlans.Add(newAction);
 				
 				return true;
 			}
-			else if(!myself.getMoveInUse())
+			else if(!_myself.MoveInUse)
 			{
 				newAction = new Action(Action.ActionType.MOVE_TOWARDS);
-				newAction.setTargetPoint(tempPercept.locOne);
+				newAction.TargetPoint = (tempPercept.locOne);
 
 				this.currentPlans.Clear();
 				this.currentPlans.Add(newAction);

@@ -21,10 +21,16 @@ public class Agent
 
 	//////////////////////////////////////////////////////////////////
 	#region Bookkeeping
-	private	System.Guid guid				= System.Guid.NewGuid();
-	private bool needsInitialization		= true;
+	[SerializeField]
+	private	System.Guid _guid				= System.Guid.NewGuid();
+	public System.Guid Guid { get { return _guid; } }
 
-	private AgentRenderer myRenderer;
+	[SerializeField]
+	private bool _needsInitialization		= true;
+
+	[SerializeField]
+	private AgentRenderer _myRenderer;
+	public AgentRenderer Renderer { set { _myRenderer = value; } }
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -33,23 +39,129 @@ public class Agent
 	#region Agent traits
 	// Several of these wouldn't "const" correctly, so for now non-DRYly
 	// duplicating the 'defaults' down in configureDefault()
-	private AgentPercept.LivingState living	= AgentPercept.LivingState.ALIVE;
-	private AgentType agentType				= AgentType.HUMAN;
-	private AgentBehavior behavior			= new NoopBehavior();
-	private Color agentColor				= Color.cyan;
+	[SerializeField]
+	private AgentPercept.LivingState _living= AgentPercept.LivingState.ALIVE;
+	public AgentPercept.LivingState LivingState { get { return _living; } set { _living = value; } }
 
-	private Vector2 location				= Vector2.zero;
-	private float direction					= 0.0f;
-	private float fieldOfView				= 0.0f;
-	private float sightRange				= 0.0f;
-	private float convertRange				= 0.0f;
+	[SerializeField]
+	private AgentType _agentType			= AgentType.HUMAN;
+	public AgentType Type { get { return _agentType; } set { _agentType = value; } }
 
-	private float speedMultiplier			= 1.0f;
-	private float turnSpeedMultiplier		= 1.0f;
+	[SerializeField]
+	private AgentBehavior _behavior			= new NoopBehavior();
+	public AgentBehavior Behavior
+	{ 
+		get { return _behavior; }
+		set
+		{
+			_behavior = value;
+			value.setAgent(this);
+		}
+	}
 
-	// This is *definitely* going to need iteration. :P
-	private bool moveInUse					= false;
-	private bool lookInUse					= false;
+	[SerializeField]
+	private Color _agentColor				= Color.cyan;
+	public Color AgentColor
+	{ 
+		get { return _agentColor; } 
+		set
+		{
+			_agentColor = value; 
+			if(_myRenderer != null)
+			{
+				_myRenderer.updateColor();
+			}
+		}
+	}
+
+	[SerializeField]
+	private Vector2 _location				= Vector2.zero;
+	public Vector2 Location
+	{
+		get { return _location; }
+		set
+		{
+			_location = value;
+			if(_myRenderer != null)
+			{
+				_myRenderer.updateLocation();
+			}
+		}
+	}
+
+	[SerializeField]
+	private float _direction				= 0.0f;
+	public float Direction
+	{
+		get { return _direction; }
+		set
+		{
+			_direction = value;
+			if(_direction < 0)
+			{
+				_direction += 360;
+			}
+			if(_direction >= 360)
+			{
+				_direction -= 360;
+			}
+			if(_myRenderer != null)
+			{
+				_myRenderer.recalculateFOVImage();
+			}
+		}
+	}
+
+	[SerializeField]
+	private float _fieldOfView				= 0.0f;
+	public float FieldOfView
+	{
+		get { return _fieldOfView; }
+		set
+		{
+			_fieldOfView = value;
+			if(_myRenderer != null)
+			{
+				_myRenderer.recalculateFOVImage();
+			}
+		}
+	}
+
+	[SerializeField]
+	private float _sightRange				= 0.0f;
+	public float SightRange
+	{
+		get { return _sightRange; }
+		set
+		{
+			_sightRange = value;
+			if(_myRenderer != null)
+			{
+				_myRenderer.updateFOVScale();
+			}
+		}
+	}
+
+	[SerializeField]
+	private float _convertRange				= 0.0f;
+	public float ConvertRange { get { return _convertRange; } set { _convertRange = value; } }
+
+	[SerializeField]
+	private float _speedMultiplier			= 1.0f;
+	public float SpeedMultiplier { get { return _speedMultiplier; } set { _speedMultiplier = value; } }
+
+	[SerializeField]
+	private float _turnSpeedMultiplier		= 1.0f;
+	public float TurnSpeedMultiplier { get { return _turnSpeedMultiplier; } set { _turnSpeedMultiplier = value; } }
+
+	// These are *definitely* going to need iteration. :P
+	[SerializeField]
+	private bool _moveInUse					= false;
+	public bool MoveInUse { get { return _moveInUse; } set { _moveInUse = value; } }
+
+	[SerializeField]
+	private bool _lookInUse					= false;
+	public bool LookInUse { get { return _lookInUse; } set { _lookInUse = value; } }
 
 	#endregion Agent traits
 	//////////////////////////////////////////////////////////////////
@@ -83,7 +195,7 @@ public class Agent
 			configureDefault();
 		}
 
-		needsInitialization = false;
+		_needsInitialization = false;
 
 		switch(newType)
 		{
@@ -110,69 +222,69 @@ public class Agent
 
 	private void configureAsCustom()
 	{
-		setAgentType(AgentType.CUSTOM);
+		Type = (AgentType.CUSTOM);
 	}
 
 	private void configureAsCorpse()
 	{
-		setAgentColor(corpseColor);
-		setIsAlive(AgentPercept.LivingState.DEAD);
-		setAgentType(AgentType.CORPSE);
+		AgentColor = (corpseColor);
+		LivingState = (AgentPercept.LivingState.DEAD);
+		Type = (AgentType.CORPSE);
 
-		setSightRange(0.0f);
-		setFieldOfView(0.0f);
-		setDirection(Random.Range(-180.0f, 180.0f));
+		SightRange = (0.0f);
+		FieldOfView = (0.0f);
+		Direction = (Random.Range(-180.0f, 180.0f));
 
-		setBehavior(new NoopBehavior());
+		Behavior = (new NoopBehavior());
 	}
 
 	private void configureAsHuman()
 	{
-		setAgentColor(humanColor);
-		setIsAlive(AgentPercept.LivingState.ALIVE);
-		setAgentType(AgentType.HUMAN);
-		setSightRange(36.0f);
-		setFieldOfView(180.0f); // roughly full range of vision
-		setDirection(Random.Range(-180.0f, 180.0f));
-		setSpeedMultiplier(1.15f);
+		AgentColor = (humanColor);
+		LivingState = (AgentPercept.LivingState.ALIVE);
+		Type = (AgentType.HUMAN);
+		SightRange = (36.0f);
+		FieldOfView = (180.0f); // roughly full range of vision
+		Direction = (Random.Range(-180.0f, 180.0f));
+		SpeedMultiplier = (1.15f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		tempFTB.addBehavior( new FleeBehavior() );
 		tempFTB.addBehavior( new WanderBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() );
 		
-		setBehavior(tempFTB);
+		Behavior = (tempFTB);
 	}
 
 	private void configureAsPlayableHuman()
 	{
-		setAgentColor(humanPlayerColor);
-		setIsAlive(AgentPercept.LivingState.ALIVE);
-		setAgentType(AgentType.HUMAN_PLAYER);
-		setSightRange(49.0f); // longer range to help with reaction time
-		setFieldOfView(135.0f); // slightly expanded vision range, same
-		setDirection(Random.Range(-180.0f, 180.0f));
-		setSpeedMultiplier(1.25f); // and slightly faster
-		setTurnSpeedMultiplier(2.0f);
+		AgentColor = (humanPlayerColor);
+		LivingState = (AgentPercept.LivingState.ALIVE);
+		Type = (AgentType.HUMAN_PLAYER);
+		SightRange = (49.0f); // longer range to help with reaction time
+		FieldOfView = (135.0f); // slightly expanded vision range, same
+		Direction = (Random.Range(-180.0f, 180.0f));
+		SpeedMultiplier = (1.25f); // and slightly faster
+		TurnSpeedMultiplier = (2.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		tempFTB.addBehavior( new PlayerControlBehavior() );
 		tempFTB.addBehavior( new ExtractionBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() ); // leaving this in for now, useful.
 		
-		setBehavior(tempFTB);
+		Behavior = (tempFTB);
 	}
 
 	private void configureAsZombie()
 	{
-		setAgentColor(zombieColor);
-		setIsAlive(AgentPercept.LivingState.UNDEAD);
-		setAgentType(AgentType.ZOMBIE);
-		setSightRange(25.0f);
-		setFieldOfView(120.0f);
-		setDirection(Random.Range(-180.0f, 180.0f));
-		setSpeedMultiplier(1.0f);
-		setConvertRange(2.0f);
+		AgentColor = (zombieColor);
+		LivingState = (AgentPercept.LivingState.UNDEAD);
+		Type = (AgentType.ZOMBIE);
+		SightRange = (25.0f);
+		FieldOfView = (120.0f);
+		Direction = (Random.Range(-180.0f, 180.0f));
+		SpeedMultiplier = (1.0f);
+		ConvertRange = (2.0f);
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		// General Zombie:
@@ -185,50 +297,50 @@ public class Agent
 		// Boid Zombies
 //		tempFTB.addBehavior( new BoidsBehavior());
 //		tempFTB.addBehavior( new WanderBehavior() );
-//		setFieldOfView(351.0f); // add a "tail wedge" to show direction, until something better is in
+//		FieldOfView = (351.0f); // add a "tail wedge" to show direction, until something better is in
 		
-		setBehavior(tempFTB);
+		Behavior = (tempFTB);
 	}
 
 	private void configureAsPlayableZombie()
 	{
-		setAgentColor(zombieColor);
-		setIsAlive(AgentPercept.LivingState.UNDEAD);
-		setAgentType(AgentType.ZOMBIE_PLAYER);
-		setSightRange(36.0f); // slightly expanded, to account for reaction time and lack of overwhelming numbers
-		setFieldOfView(135.0f); // super zombie
-		setDirection(Random.Range(-180.0f, 180.0f));
-		setSpeedMultiplier(1.15f); // same as a human
-		setTurnSpeedMultiplier(2.0f); // just a lot more responsive this way
-		setConvertRange(5.0f); // significant boost, to help account for lag/control timing
+		AgentColor = (zombieColor);
+		LivingState = (AgentPercept.LivingState.UNDEAD);
+		Type = (AgentType.ZOMBIE_PLAYER);
+		SightRange = (36.0f); // slightly expanded, to account for reaction time and lack of overwhelming numbers
+		FieldOfView = (135.0f); // super zombie
+		Direction = (Random.Range(-180.0f, 180.0f));
+		SpeedMultiplier = (1.15f); // same as a human
+		TurnSpeedMultiplier = (2.0f); // just a lot more responsive this way
+		ConvertRange = (5.0f); // significant boost, to help account for lag/control timing
 		
 		FallThroughBehavior tempFTB = new FallThroughBehavior();
 		tempFTB.addBehavior( new ZombifyBehavior() );
 		tempFTB.addBehavior( new PlayerControlBehavior() );
 		tempFTB.addBehavior( new RandomLookBehavior() );
 		
-		setBehavior(tempFTB);
+		Behavior = (tempFTB);
 	}
 	
 
 
 	private void configureDefault()
 	{
-		setIsAlive(AgentPercept.LivingState.ALIVE);
-		setAgentType(AgentType.HUMAN);
-		setBehavior(new NoopBehavior());
-		setAgentColor(humanColor);
+		LivingState = (AgentPercept.LivingState.ALIVE);
+		Type = (AgentType.HUMAN);
+		Behavior = (new NoopBehavior());
+		AgentColor = (humanColor);
 
-		setDirection(0.0f);
-		setFieldOfView(0.0f);
-		setSightRange(0.0f);
-		setConvertRange(0.0f);
+		Direction = (0.0f);
+		FieldOfView = (0.0f);
+		SightRange = (0.0f);
+		ConvertRange = (0.0f);
 
-		setSpeedMultiplier(1.0f);
-		setTurnSpeedMultiplier(1.0f);
+		SpeedMultiplier = (1.0f);
+		TurnSpeedMultiplier = (1.0f);
 
-		setMoveInUse(false);
-		setLookInUse(false);
+		MoveInUse = (false);
+		LookInUse = (false);
 	}
 
 	#endregion Agent type definitions
@@ -239,174 +351,9 @@ public class Agent
 
 	public void extractSuccess()
 	{
-		myRenderer.gameObject.SetActive(false);
+		_myRenderer.gameObject.SetActive(false);
 	}
 
-	#endregion AAgent state updates
-	//////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////
-	#region Getter/Setters
-	// Many of these may be fine as properties, but I'm expecting some/all to grow complex.
-
-	public void setRenderer(AgentRenderer newRenderer)
-	{
-		myRenderer = newRenderer;
-	}
-
-	public System.Guid getGuid()
-	{
-		return guid;
-	}
-
-	public Color getAgentColor()
-	{
-		return agentColor;
-	}
-	public void setAgentColor(Color newColor)
-	{
-		agentColor = newColor;
-		if(myRenderer != null)
-		{
-			myRenderer.updateColor();
-		}
-	}
-
-	public AgentPercept.LivingState getLivingState()
-	{
-		return living;
-	}
-	public void setIsAlive(AgentPercept.LivingState newState)
-	{
-		living = newState;
-	}
-
-	public AgentType getAgentType()
-	{
-		return agentType;
-	}
-	public void setAgentType(AgentType newType)
-	{
-		agentType = newType;
-	}
-
-	public AgentBehavior getBehavior()
-	{
-		return behavior;
-	}
-	public void setBehavior(AgentBehavior newBehavior)
-	{
-		behavior = newBehavior;
-		newBehavior.setAgent(this);
-	}
-
-	public Vector2 getLocation()
-	{
-		return location;
-	}
-	public void setLocation(Vector2 newLocation)
-	{
-		location = newLocation;
-		if(myRenderer != null)
-		{
-			myRenderer.updateLocation();
-		}
-	}
-
-	public float getDirection()
-	{
-		return direction;
-	}
-	public void setDirection(float newDirection)
-	{
-		direction = newDirection;
-		if(direction < 0)
-		{
-			direction += 360;
-		}
-		if(direction >= 360)
-		{
-			direction -= 360;
-		}
-		if(myRenderer != null)
-		{
-			myRenderer.recalculateFOVImage();
-		}
-
-	}
-
-	public float getFieldOfView()
-	{
-		return fieldOfView;
-	}
-	public void setFieldOfView(float newFieldOfView)
-	{
-		fieldOfView = newFieldOfView;
-		if(myRenderer != null)
-		{
-			myRenderer.recalculateFOVImage();
-		}
-	}
-
-	public float getSightRange()
-	{
-		return sightRange;
-	}
-
-	public void setSightRange(float newRange)
-	{
-		float multiplier = newRange/16f; // magic number, but accurate.
-		sightRange = newRange;
-		if(myRenderer != null)
-		{
-			myRenderer.updateFOVScale();
-		}
-	}
-
-	public float getSpeedMultiplier()
-	{
-		return speedMultiplier;
-	}
-	public void setSpeedMultiplier(float newMult)
-	{
-		speedMultiplier = newMult;
-	}
-
-	public float getTurnSpeedMultipler()
-	{
-		return turnSpeedMultiplier;
-	}
-	public void setTurnSpeedMultiplier(float newMult)
-	{
-		turnSpeedMultiplier = newMult;
-	}
-
-	public bool getMoveInUse()
-	{
-		return moveInUse;
-	}
-	public void setMoveInUse(bool newUseState)
-	{
-		moveInUse = newUseState;
-	}
-
-	public bool getLookInUse()
-	{
-		return lookInUse;
-	}
-	public void setLookInUse(bool newUseState)
-	{
-		lookInUse = newUseState;
-	}
-
-	public float getConvertRange()
-	{
-		return convertRange;
-	}
-	public void setConvertRange(float newRange)
-	{
-		convertRange = newRange;
-	}
-	#endregion MonoBehaviour methods
+	#endregion Agent state updates
 	//////////////////////////////////////////////////////////////////
 }
