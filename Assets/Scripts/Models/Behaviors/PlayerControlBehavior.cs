@@ -49,6 +49,11 @@ public class PlayerControlBehavior : AgentBehavior
 			newMoveAction.TargetPoint = (_myself.Location + moveVector);
 			this.currentPlans.Add(newMoveAction);
 		}
+		else
+		{
+			newMoveAction = new Action(Action.ActionType.STAY);
+			this.currentPlans.Add(newMoveAction);
+		}
 		if(lookVector != Vector2.zero)
 		{
 			newLookAction = new Action(Action.ActionType.TURN_TO_DEGREES);
