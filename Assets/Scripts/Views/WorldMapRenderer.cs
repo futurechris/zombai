@@ -41,7 +41,7 @@ public class WorldMapRenderer : MonoBehaviour {
 //	void Start(){}
 	// Update is called once per frame
 //	void Update(){}
-
+	
 	public void purge()
 	{
 		for(int i=agentsGO.transform.childCount-1; i>=0; i--)
@@ -51,6 +51,10 @@ public class WorldMapRenderer : MonoBehaviour {
 		for(int i=structuresGO.transform.childCount-1; i>=0; i--)
 		{
 			Destroy(structuresGO.transform.GetChild(i).gameObject);
+		}
+		for(int i=worldObjectsGO.transform.childCount-1; i>=0; i--)
+		{
+			Destroy(worldObjectsGO.transform.GetChild(i).gameObject);
 		}
 	}
 	#endregion MonoBehaviour methods & helpers
