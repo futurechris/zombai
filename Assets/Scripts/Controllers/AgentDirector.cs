@@ -335,6 +335,9 @@ public class AgentDirector : MonoBehaviour {
 	//////////////////////////////////////////////////////////////////
 	#region Getters/Setters
 	// leaving these as non-properties for now
+	// Because Unity doesn't show Properties in the inspector without a custom editor script
+	// The point of the Boids parameters is to be tweaked in the inspector, not so much to
+	// be long-term real values.
 	
 	public void setSimulationSpeed(float newSimSpeed)
 	{
