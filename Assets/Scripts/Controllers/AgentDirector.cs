@@ -168,7 +168,8 @@ public class AgentDirector : MonoBehaviour {
 			{
 				agent.LookInUse = (false);
 				agent.MoveInUse = (false);
-				agent.Behavior.updatePlan( worldMap.getPercepts(agent, _perfectVisionRange), 1 );
+				worldMap.getPercepts(agent, _perfectVisionRange);
+				agent.Behavior.updatePlan( null, 1 );
 			}
 		}
 		float timeF = Time.realtimeSinceStartup;

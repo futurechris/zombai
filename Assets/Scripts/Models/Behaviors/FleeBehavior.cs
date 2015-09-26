@@ -15,7 +15,7 @@ public class FleeBehavior : AgentBehavior
 		Action newAction;
 
 		Agent nearestEnemy;
-		bool found = findNearestAgent(percepts, AgentPercept.LivingState.UNDEAD, out nearestEnemy);
+		bool found = findNearestAgent(_myself.PerceptPool, AgentPercept.LivingState.UNDEAD, out nearestEnemy);
 		
 		if(found && !_myself.MoveInUse)
 		{

@@ -9,7 +9,7 @@ public class ExtractionBehavior : AgentBehavior {
 		Action newAction;
 		
 		AgentPercept tempPercept;
-		bool found = findNearestPercept(percepts, AgentPercept.LivingState.INANIMATE, AgentPercept.PerceptType.EXTRACT, out tempPercept);
+		bool found = findNearestPercept(_myself.PerceptPool, AgentPercept.LivingState.INANIMATE, AgentPercept.PerceptType.EXTRACT, out tempPercept);
 		
 		if(found)
 		{

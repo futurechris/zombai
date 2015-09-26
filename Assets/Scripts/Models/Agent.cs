@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Agent
 {
@@ -31,6 +32,12 @@ public class Agent
 	[SerializeField]
 	private AgentRenderer _myRenderer;
 	public AgentRenderer Renderer { set { _myRenderer = value; } }
+
+	[SerializeField]
+	protected List<AgentPercept> _perceptPool	= new List<AgentPercept>();
+	public List<AgentPercept> PerceptPool { get { return _perceptPool; } }
+
+	private int _perceptIndex = 0;
 
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
@@ -352,6 +359,21 @@ public class Agent
 	public void extractSuccess()
 	{
 		_myRenderer.gameObject.SetActive(false);
+	}
+
+	public void resetPercepts()
+	{
+		_perceptIndex = 0;
+	}
+
+	public AgentPercept getNextPercept()
+	{
+		if(_perceptIndex >= _perceptPool.Count)
+		{
+			_perceptPool.Add(new AgentPercept());
+			return _perceptPool[_perceptPool.Count-1];
+		}
+		return _perceptPool[_perceptIndex++];
 	}
 
 	#endregion Agent state updates

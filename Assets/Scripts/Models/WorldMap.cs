@@ -248,9 +248,10 @@ public class WorldMap
 	#region Agent-World Interactions
 	
 	// Agent perceives world through this function alone.
-	public List<AgentPercept> getPercepts(Agent agent, float perfectVisionRange)
+	public void /*List<AgentPercept>*/ getPercepts(Agent agent, float perfectVisionRange)
 	{
-		List<AgentPercept> apList = new List<AgentPercept>();
+//		List<AgentPercept> apList = new List<AgentPercept>();
+		agent.resetPercepts();
 
 		AgentPercept tempPercept;
 
@@ -270,7 +271,7 @@ public class WorldMap
 			}
 			if(canPerceivePosition(agent, nearbyAgents[i].Location, perfectVisionRange))
 			{
-				tempPercept 		= new AgentPercept();
+				tempPercept 		= agent.getNextPercept();// new AgentPercept();
 				tempPercept.type 	= AgentPercept.PerceptType.AGENT;
 				tempPercept.locOne 	= nearbyAgents[i].Location;
 				tempPercept.living 	= nearbyAgents[i].LivingState;
@@ -280,7 +281,7 @@ public class WorldMap
 				// See AgentPercept.perceivedAgent for more.
 				tempPercept.perceivedAgent = nearbyAgents[i];
 
-				apList.Add(tempPercept);
+//				apList.Add(tempPercept);
 				tempPercept 		= null;
 			}
 		}
@@ -291,12 +292,12 @@ public class WorldMap
 		List<AgentPercept> structureList = null;
 		for(int i=0; i<nearbyStructures.Count; i++)
 		{
-			structureList = perceiveStructure(agent, nearbyStructures[i]);
-			if(structureList != null)
+			/*structureList = */perceiveStructure(agent, nearbyStructures[i]);
+			/*if(structureList != null)
 			{
 				apList.AddRange(structureList);
 			}
-			structureList = null;
+			structureList = null;*/
 		}
 
 		// TODO: Work out a smarter way to handle WorldObjects than point-based
@@ -306,18 +307,18 @@ public class WorldMap
 			{
 				if(canPerceivePosition(agent, worldObjects[wo].Location, perfectVisionRange))
 				{
-					tempPercept = new AgentPercept();
+					tempPercept = agent.getNextPercept();// new AgentPercept();
 					tempPercept.type = AgentPercept.PerceptType.EXTRACT;
 					tempPercept.locOne = worldObjects[wo].Location;
 					tempPercept.living = AgentPercept.LivingState.INANIMATE;
 					
-					apList.Add(tempPercept);
+//					apList.Add(tempPercept);
 					tempPercept = null;
 				}
 			}
 		}
 
-		return apList;
+//		return apList;
 	}
 
 	public bool canPerceivePosition(Agent who, Vector2 where, float perfectVisionRange)
@@ -349,10 +350,10 @@ public class WorldMap
 		return false;
 	}
 
-	public List<AgentPercept> perceiveStructure(Agent who, Rect what)
+	public void perceiveStructure(Agent who, Rect what)
 	{
-		// TODO: Calculate chunks of walls that are visible, return those.
-		return null;
+		// TODO: Calculate chunks of walls that are visible, set those for the agent
+		return;
 	}
 
 	public void extractAgent(Agent who)

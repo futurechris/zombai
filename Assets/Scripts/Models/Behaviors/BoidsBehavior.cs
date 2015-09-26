@@ -21,13 +21,13 @@ public class BoidsBehavior : AgentBehavior {
 
 		Agent tempAgent;
 		// make sure there's a nearby agent to respond to
-		bool found = findNearestAgent(percepts, AgentPercept.LivingState.UNDEAD, out tempAgent);
+		bool found = findNearestAgent(_myself.PerceptPool, AgentPercept.LivingState.UNDEAD, out tempAgent);
 
 		if(found && !_myself.MoveInUse && !_myself.LookInUse)
 		{
-			Vector2 separationVector = calculateSeparationVector(percepts,allottedWorkUnits, separationThreshold);
-			Vector2 alignmentVector = calculateAlignmentVector(percepts,allottedWorkUnits);
-			Vector2 cohesionVector = calculateCohesionVector(percepts,allottedWorkUnits);
+			Vector2 separationVector = calculateSeparationVector(_myself.PerceptPool,allottedWorkUnits, separationThreshold);
+			Vector2 alignmentVector = calculateAlignmentVector(_myself.PerceptPool,allottedWorkUnits);
+			Vector2 cohesionVector = calculateCohesionVector(_myself.PerceptPool,allottedWorkUnits);
 
 			Vector2 moveVector = 
 					  separationWeight * separationVector

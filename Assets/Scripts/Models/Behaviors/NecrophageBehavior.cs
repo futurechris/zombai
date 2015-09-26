@@ -15,7 +15,7 @@ public class NecrophageBehavior : AgentBehavior
 		Action newLookAction;
 
 		Agent tempAgent;
-		bool found = findNearestAgent(percepts, AgentPercept.LivingState.DEAD, out tempAgent);
+		bool found = findNearestAgent(_myself.PerceptPool, AgentPercept.LivingState.DEAD, out tempAgent);
 		
 		if(found && !_myself.MoveInUse && !_myself.LookInUse)
 		{

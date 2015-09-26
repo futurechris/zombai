@@ -16,7 +16,7 @@ public class PursueBehavior : AgentBehavior
 		Action newLookAction;
 
 		Agent tempAgent;
-		bool found = findNearestAgent(percepts, AgentPercept.LivingState.ALIVE, out tempAgent);
+		bool found = findNearestAgent(_myself.PerceptPool, AgentPercept.LivingState.ALIVE, out tempAgent);
 
 		if(found && !_myself.MoveInUse)
 		{
