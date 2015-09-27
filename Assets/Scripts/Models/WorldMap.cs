@@ -10,10 +10,10 @@ public class WorldMap
 
 	private int minimumStreetWidth 	= 5;
 
-	private int agentTreeSplit 		= 50;
+	private int agentTreeSplit 		= 10;
 	private int agentDepthLimit 	= 15;
 
-	private int buildingTreeSplit 	= 100;
+	private int buildingTreeSplit 	= 10;
 	private int buildingDepthLimit 	= 15;
 
 	#endregion Parameters & properties
@@ -248,9 +248,8 @@ public class WorldMap
 	#region Agent-World Interactions
 	
 	// Agent perceives world through this function alone.
-	public void /*List<AgentPercept>*/ getPercepts(Agent agent, float perfectVisionRange)
+	public void getPercepts(Agent agent, float perfectVisionRange)
 	{
-//		List<AgentPercept> apList = new List<AgentPercept>();
 		agent.resetPercepts();
 
 		AgentPercept tempPercept;
@@ -281,7 +280,6 @@ public class WorldMap
 				// See AgentPercept.perceivedAgent for more.
 				tempPercept.perceivedAgent = nearbyAgents[i];
 
-//				apList.Add(tempPercept);
 				tempPercept 		= null;
 			}
 		}
@@ -292,12 +290,7 @@ public class WorldMap
 		List<AgentPercept> structureList = null;
 		for(int i=0; i<nearbyStructures.Count; i++)
 		{
-			/*structureList = */perceiveStructure(agent, nearbyStructures[i]);
-			/*if(structureList != null)
-			{
-				apList.AddRange(structureList);
-			}
-			structureList = null;*/
+			perceiveStructure(agent, nearbyStructures[i]);
 		}
 
 		// TODO: Work out a smarter way to handle WorldObjects than point-based
@@ -311,14 +304,11 @@ public class WorldMap
 					tempPercept.type = AgentPercept.PerceptType.EXTRACT;
 					tempPercept.locOne = worldObjects[wo].Location;
 					tempPercept.living = AgentPercept.LivingState.INANIMATE;
-					
-//					apList.Add(tempPercept);
+
 					tempPercept = null;
 				}
 			}
 		}
-
-//		return apList;
 	}
 
 	public bool canPerceivePosition(Agent who, Vector2 where, float perfectVisionRange)
@@ -381,6 +371,7 @@ public class WorldMap
 			agentTree.Insert(agents[i],agents[i].Location.x, agents[i].Location.y, 0,0);
 		}
 	}
+
 	#endregion Tree Helpers
 	//////////////////////////////////////////////////////////////////
 
