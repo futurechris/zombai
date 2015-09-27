@@ -39,7 +39,7 @@ public class PlayerControlBehavior : AgentBehavior
 
 			if(hAxis != 0 || vAxis != 0)
 			{
-				moveVector = new Vector2(hAxis/2.0f, vAxis/2.0f);
+				moveVector = new Vector2(hAxis*200.0f, vAxis*200.0f);
 			}
 		}
 
@@ -66,8 +66,12 @@ public class PlayerControlBehavior : AgentBehavior
 		else if(moveVector != Vector2.zero)
 		{
 			// if no specific look input, turn in the direction we're moving
-			newLookAction = new Action(Action.ActionType.TURN_TOWARDS);
-			newLookAction.TargetPoint = (_myself.Location + moveVector);
+			// should maybe merge this block with the lookVector block above.
+			newLookAction = new Action(Action.ActionType.TURN_TO_DEGREES);
+			Vector2 netVector = moveVector;
+			float angle = 90.0f - Mathf.Rad2Deg * Mathf.Atan2(netVector.x, netVector.y);
+			
+			newLookAction.Direction = (angle);
 			this.currentPlans.Add(newLookAction);
 		}
 
