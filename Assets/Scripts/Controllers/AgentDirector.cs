@@ -23,9 +23,12 @@ public class AgentDirector : MonoBehaviour {
 	public bool resetWhenAllDead 		= true;
 
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
-	private int	_targetFramerate 		= 15; // fps
-	public 	int targetFramerate  		= 15;
-	
+	private float _targetFrameFreq 		= 1.0f/15.0f; // 1 / fps
+	public 	float targetFrameFreq  		= 1.0f/15.0f;
+
+	private float _UATtotalTime			= 0.0f; // init to expecting it's instantaneous
+	private float _UATtotalCount		= 1.0f;
+
 	// how many pixels should be moved per second for an agent on the go.
 	private float _moveSpeed 			= 10.0f;
 
@@ -115,26 +118,7 @@ public class AgentDirector : MonoBehaviour {
 		// 0. Update parameters
 		updateParameters();
 
-		if(Input.GetKeyDown(KeyCode.Z))
-		{
-			mapRenderer.instantiateAgents(worldMap.populateWorld(0,0,1));
-			worldMap.updateAgentTree();
-		}
-		if(Input.GetKeyDown(KeyCode.H))
-		{
-			mapRenderer.instantiateAgents(worldMap.populateWorld(1,0,0));
-			worldMap.updateAgentTree();
-		}
-		if(Input.GetKeyDown(KeyCode.C))
-		{
-			mapRenderer.instantiateAgents(worldMap.populateWorld(0,1,0));
-			worldMap.updateAgentTree();
-		}
-		if(Input.GetKeyDown(KeyCode.E))
-		{
-			mapRenderer.instantiateObjects(worldMap.placeWorldObject(WorldObject.ObjectType.EXTRACT_POINT));
-		}
-
+		handleKeyInput();
 
 		// 1. If world is paused, exit early
 		if(paused)
@@ -152,26 +136,30 @@ public class AgentDirector : MonoBehaviour {
 		float timeC = Time.realtimeSinceStartup;
 		// 3. Action arbiter determines outcome of opposed actions
 		ActionArbiter.Instance.resolveActions();
-
 		float timeD = Time.realtimeSinceStartup;
+
+		float timeLeft = targetFrameFreq - (timeD - Time.time); // how much time is left over if we're to hit target freq
+
 		// 4. Update worldMap's quadTree
-		worldMap.updateAgentTree();
+		bool ranUAT = false;
+		if(timeLeft > (_UATtotalTime/_UATtotalCount))
+		{
+			worldMap.updateAgentTree();
+			// maintain rough estimate of how long this has been taking
+			_UATtotalTime += Time.realtimeSinceStartup-timeD;
+			_UATtotalCount++;
+			ranUAT = true;
+		}
 
 		float timeE = Time.realtimeSinceStartup;
+
 		// 5. Allocate time to agents to process percepts and update plans
-		foreach(Agent agent in worldMap.getAgents())
+		if(ranUAT)
 		{
-			// Currently the '1' work unit is meaningless - agents will just do their little
-			// calculation and be done with it.
-			if(		agent.LivingState == AgentPercept.LivingState.ALIVE
-			   || 	agent.LivingState == AgentPercept.LivingState.UNDEAD)
-			{
-				agent.LookInUse = (false);
-				agent.MoveInUse = (false);
-				worldMap.getPercepts(agent, _perfectVisionRange);
-				agent.Behavior.updatePlan( null, 1 );
-			}
+			updateAgentPlans();
 		}
+
+
 		float timeF = Time.realtimeSinceStartup;
 		cycles++;
 
@@ -201,12 +189,52 @@ public class AgentDirector : MonoBehaviour {
 			buildWorld();
 		}
 	}
-	
+
+	private void updateAgentPlans()
+	{
+		foreach(Agent agent in worldMap.getAgents())
+		{
+			// Currently the '1' work unit is meaningless - agents will just do their little
+			// calculation and be done with it.
+			if(		agent.LivingState == AgentPercept.LivingState.ALIVE
+			   || 	agent.LivingState == AgentPercept.LivingState.UNDEAD)
+			{
+				agent.LookInUse = (false);
+				agent.MoveInUse = (false);
+				worldMap.getPercepts(agent, _perfectVisionRange);
+				agent.Behavior.updatePlan( null, 1 );
+			}
+		}
+	}
+
+	private void handleKeyInput()
+	{
+		if(Input.GetKeyDown(KeyCode.Z))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(0,0,1));
+			worldMap.updateAgentTree();
+		}
+		if(Input.GetKeyDown(KeyCode.H))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(1,0,0));
+			worldMap.updateAgentTree();
+		}
+		if(Input.GetKeyDown(KeyCode.C))
+		{
+			mapRenderer.instantiateAgents(worldMap.populateWorld(0,1,0));
+			worldMap.updateAgentTree();
+		}
+		if(Input.GetKeyDown(KeyCode.E))
+		{
+			mapRenderer.instantiateObjects(worldMap.placeWorldObject(WorldObject.ObjectType.EXTRACT_POINT));
+		}
+	}
+
 	private void updateParameters()
 	{
-		if(targetFramerate != _targetFramerate)
+		if(targetFrameFreq != _targetFrameFreq)
 		{
-			_targetFramerate = targetFramerate;
+			_targetFrameFreq = targetFrameFreq;
 		}
 	}
 
