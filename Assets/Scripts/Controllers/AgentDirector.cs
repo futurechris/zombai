@@ -108,6 +108,7 @@ public class AgentDirector : MonoBehaviour {
 		if(spawnPlayerAgent)
 		{
 			spawnAgent(Agent.AgentType.HUMAN_PLAYER);
+			mapRenderer.instantiateObjects(worldMap.placeWorldObject(WorldObject.ObjectType.EXTRACT_POINT));
 		}
 	}
 	
