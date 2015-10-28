@@ -9,7 +9,7 @@ public class NecrophageBehavior : AgentBehavior
 	private static float necrophageRadiusMultiplier = 0.5f;
 
 	// "pursue" nearest corpse
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		Action newMoveAction;
 		Action newLookAction;

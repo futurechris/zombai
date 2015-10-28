@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PlayerControlBehavior : AgentBehavior
 {
 	// Get keyboard/touch input and convert it into a "plan"
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.MoveInUse)
 		{

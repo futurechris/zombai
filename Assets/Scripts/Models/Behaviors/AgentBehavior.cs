@@ -9,17 +9,80 @@ public class AgentBehavior
 	[SerializeField]
 	protected Agent _myself;
 
+	protected float planUpdateStart = 0.0f;
+	protected float planUpdateDelta = 0.0f;
+	protected float planUpdateTime = 0.0f; // start off skipping slow calls by default
+	protected float planUpdateCount = 1.0f; // fudge-y but saves a branch and a call
+	protected bool planUpdateResult = false;
+
+	protected float planUpdateBudget = 0.0f;
+
+	protected float actionTotalTime = 0.00001f;
+	protected float actionTotalCount = 1.0f; // fudge-y again
+
 	public List<Action> getCurrentPlans()
 	{
 		return currentPlans;
 	}
 
-	public virtual bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public void addBudget(float allottedWorkUnits)
+	{
+		planUpdateBudget += allottedWorkUnits;
+	}
+
+	public float requestedActionBudget()
+	{
+		return actionTotalTime / actionTotalCount;
+	}
+
+	public void actionTimeTaken(float duration)
+	{
+		actionTotalTime += duration;
+		actionTotalCount++;
+	}
+
+	// returns expected budget
+	public float requestedPlanBudget()
+	{
+		if(planUpdateBudget >= (planUpdateTime / planUpdateCount))
+		{
+//			Debug.Log("Requesting: "+planUpdateBudget+" cost: "+(planUpdateTime / planUpdateCount));
+			return (planUpdateTime / planUpdateCount);
+		}
+//		Debug.Log("Not Requesting: "+planUpdateBudget+" cost: "+(planUpdateTime / planUpdateCount));
+		return float.MaxValue;
+	}
+	
+	public bool updatePlan(WorldMap worldMap, float perfectVisionRange)
+	{
+		// TODO: Decide whether actual is more useful here than anticipated
+		planUpdateBudget -= (planUpdateTime / planUpdateCount); // decrement by expected time rather than actual.
+
+		planUpdateResult = false;
+
+		planUpdateStart = Time.unscaledTime;
+
+		// add percept-getting to the plan time
+		if(worldMap != null)
+		{
+			worldMap.getPercepts(this._myself, perfectVisionRange);
+		}
+
+		planUpdateResult = executePlanUpdate();
+		planUpdateDelta = (Time.realtimeSinceStartup - planUpdateStart);
+//		Debug.Log("Delta: "+planUpdateDelta);
+		planUpdateTime += planUpdateDelta;
+		planUpdateCount++;
+
+		return planUpdateResult;
+	}
+
+	public virtual bool executePlanUpdate()
 	{
 		currentPlans.Clear();
 		return true;
 	}
-	
+
 	protected bool findNearestPercept(List<AgentPercept> percepts, 
 	                                  AgentPercept.LivingState livingType,
 	                                  AgentPercept.PerceptType perceptType,

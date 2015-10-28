@@ -13,7 +13,7 @@ public class WanderBehavior : AgentBehavior
 	float nextReplot = float.MinValue;
 
 	
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.MoveInUse)
 		{
@@ -21,7 +21,7 @@ public class WanderBehavior : AgentBehavior
 		}
 		
 		// only update every so often
-		if(nextUpdate > Time.time)
+		if(nextUpdate > Time.realtimeSinceStartup)
 		{
 			return true;
 		}
@@ -29,10 +29,10 @@ public class WanderBehavior : AgentBehavior
 		currentPlans.Clear();
 
 		float a = wanderDirection;
-		if(nextReplot <= Time.time)
+		if(nextReplot <= Time.realtimeSinceStartup)
 		{
 			wanderDirection = Random.Range(0, 2.0f*Mathf.PI);
-			nextReplot = Time.time + replotDelay;
+			nextReplot = Time.realtimeSinceStartup + replotDelay;
 		}
 
 		wanderDelta += (Random.value * 0.1f) - 0.05f;
@@ -57,7 +57,7 @@ public class WanderBehavior : AgentBehavior
 		
 		this.currentPlans.Add(newAction);
 		
-		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.realtimeSinceStartup + 0.5f + (Random.value * updateDelay);
 		
 		return true;
 	}

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class FleeBehavior : AgentBehavior
 {
 	// flee from nearest undead
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.MoveInUse)
 		{

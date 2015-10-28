@@ -9,7 +9,7 @@ public class NoopBehavior : AgentBehavior
 		currentPlans.Clear();
 	}
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		currentPlans.Clear();
 		return true;

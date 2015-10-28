@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Holoville.HOTween;
 
 public class AgentDirector : MonoBehaviour {
 
@@ -23,11 +24,12 @@ public class AgentDirector : MonoBehaviour {
 	public bool resetWhenAllDead 		= true;
 
 	// Eventually these will be used to calculate how much time to allot to each agent's AI calcs
-	private float _targetFrameFreq 		= 1.0f/15.0f; // 1 / fps
-	public 	float targetFrameFreq  		= 1.0f/15.0f;
+	private float _targetFrameFreq 		= 1.0f/30.0f; // 1 / fps
+	public 	float targetFrameFreq  		= 1.0f/30.0f;
 
 	private float _UATtotalTime			= 0.0f; // init to expecting it's instantaneous
 	private float _UATtotalCount		= 1.0f;
+	private bool _UATneeded				= true;
 
 	// how many pixels should be moved per second for an agent on the go.
 	private float _moveSpeed 			= 10.0f;
@@ -54,6 +56,9 @@ public class AgentDirector : MonoBehaviour {
 	private int getCount				= 0;
 	public Vector2 globalTarget			= Vector2.zero;
 
+	private int prevEndIdx				= 0;
+
+
 	#endregion Parameters & properties
 	//////////////////////////////////////////////////////////////////
 
@@ -61,13 +66,6 @@ public class AgentDirector : MonoBehaviour {
 	#region Bookkeeping
 
 	WorldMap worldMap;
-
-	float cycles = 0;
-	float timeAB = 0.0f;
-	float timeBC = 0.0f;
-	float timeCD = 0.0f;
-	float timeDE = 0.0f;
-	float timeEF = 0.0f;
 
 	#endregion Bookkeeping
 	////////////////////////////////////////
@@ -115,7 +113,6 @@ public class AgentDirector : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
-		float timeA = Time.realtimeSinceStartup;
 		// 0. Update parameters
 		updateParameters();
 
@@ -127,63 +124,32 @@ public class AgentDirector : MonoBehaviour {
 			return;
 		}
 
-		float timeB = Time.realtimeSinceStartup;
 		// 2. Iterate over agents, ask them for action, run for deltaTime
 		foreach(Agent agent in worldMap.getAgents())
 		{
-			executeAction(agent, Time.deltaTime);
+			executeAction(agent, Time.deltaTime/*Time.realtimeSinceStartup + targetFrameFreq*/);
 		}
 
-		float timeC = Time.realtimeSinceStartup;
 		// 3. Action arbiter determines outcome of opposed actions
 		ActionArbiter.Instance.resolveActions();
-		float timeD = Time.realtimeSinceStartup;
 
-		float timeLeft = targetFrameFreq - (timeD - Time.time); // how much time is left over if we're to hit target freq
+		float timeLeft = targetFrameFreq - (Time.realtimeSinceStartup - Time.unscaledTime); // how much time is left over if we're to hit target freq
 
 		// 4. Update worldMap's quadTree
-		bool ranUAT = false;
-		if(timeLeft > (_UATtotalTime/_UATtotalCount))
+		float timeStart = Time.realtimeSinceStartup;
+		if(timeLeft > (_UATtotalTime/_UATtotalCount) && _UATneeded)
 		{
 			worldMap.updateAgentTree();
 			// maintain rough estimate of how long this has been taking
-			_UATtotalTime += Time.realtimeSinceStartup-timeD;
+			_UATtotalTime += Time.realtimeSinceStartup-timeStart;
 			_UATtotalCount++;
-			ranUAT = true;
+			_UATneeded = false;
 		}
-
-		float timeE = Time.realtimeSinceStartup;
 
 		// 5. Allocate time to agents to process percepts and update plans
-		if(ranUAT)
-		{
-			updateAgentPlans();
-		}
+		timeLeft = targetFrameFreq - (Time.realtimeSinceStartup - Time.unscaledTime);
 
-
-		float timeF = Time.realtimeSinceStartup;
-		cycles++;
-
-		timeAB += (timeB-timeA);
-		timeBC += (timeC-timeB);
-		timeCD += (timeD-timeC);
-		timeDE += (timeE-timeD);
-		timeEF += (timeF-timeE);
-
-		// comments are rough results of tests
-		// Roughly one third spent on executeAction
-		// Most of the remaining on planning
-		// Good! Gives us space to improve with LOD.
-		float avgAB = timeAB/cycles; // 0
-		float avgBC = timeBC/cycles; // 32
-		float avgCD = timeCD/cycles; // 0
-		float avgDE = timeDE/cycles; // 1
-		float avgEF = timeEF/cycles; // 67
-		float total = (avgAB+avgBC+avgCD+avgDE+avgEF)/100.0f;
-
-//		Debug.Log("Times:    "+timeAB+", "+timeBC+", "+timeCD+", "+timeDE+", "+timeEF);
-//		Debug.Log("AvgTimes: "+avgAB+", "+avgBC+", "+avgCD+", "+avgDE+", "+avgEF);
-//		Debug.Log("Percents: "+(avgAB/total)+", "+(avgBC/total)+", "+(avgCD/total)+", "+(avgDE/total)+", "+(avgEF/total));
+		updateAgentPlans(timeLeft);
 
 		if(worldMap.getLivingCount() == 0 && resetWhenAllDead)
 		{
@@ -191,19 +157,53 @@ public class AgentDirector : MonoBehaviour {
 		}
 	}
 
-	private void updateAgentPlans()
+	private void updateAgentPlans(float timeLeft)
 	{
-		foreach(Agent agent in worldMap.getAgents())
+		float endTime = Time.realtimeSinceStartup+timeLeft; // when we reach endTime, can't plan anymore.
+
+		float timePerAgent = timeLeft;
+		float startTime = 0.0f;
+		float perceptTime = 0.0f;
+		float requestTime = 0.0f;
+		List<Agent> agentList = worldMap.getAgents();
+		int listSize = agentList.Count;
+
+		if(listSize != 0)
 		{
+			timePerAgent /= (float)(listSize);
+		}
+		else
+		{
+			return;
+		}
+
+		Agent agent;
+		for(int idxOffset=0; idxOffset<listSize; idxOffset++)
+		{
+//			Debug.Log("Checking agent "+((prevEndIdx+idxOffset)%listSize));
+			agent = agentList[(prevEndIdx+idxOffset)%listSize];
 			// Currently the '1' work unit is meaningless - agents will just do their little
 			// calculation and be done with it.
 			if(		agent.LivingState == AgentPercept.LivingState.ALIVE
 			   || 	agent.LivingState == AgentPercept.LivingState.UNDEAD)
 			{
-				agent.LookInUse = (false);
-				agent.MoveInUse = (false);
-				worldMap.getPercepts(agent, _perfectVisionRange);
-				agent.Behavior.updatePlan( null, 1 );
+				agent.LookInUse = false;
+				agent.MoveInUse = false;
+				agent.Behavior.addBudget(timePerAgent);
+				requestTime = agent.Behavior.requestedPlanBudget();
+
+				if(Time.realtimeSinceStartup+requestTime < endTime)
+				{
+					agent.Behavior.updatePlan( worldMap, _perfectVisionRange );
+					_UATneeded = true;
+				}
+			}
+			if(Time.realtimeSinceStartup > endTime)
+			{
+				Debug.Log("Last PEI: "+prevEndIdx+" @ "+idxOffset+" # "+timeLeft);
+				prevEndIdx = (prevEndIdx+idxOffset)%listSize;
+				Debug.Log("New PEI: "+prevEndIdx+" size: "+listSize);
+				return;
 			}
 		}
 	}
@@ -258,8 +258,17 @@ public class AgentDirector : MonoBehaviour {
 	private void executeAction(Agent agent, float duration)
 	{
 		List<Action> planList = agent.Behavior.getCurrentPlans();
+
+		if(agent.Behavior.requestedActionBudget()*planList.Count > duration)
+		{
+			return;
+		}
+
+		float startTime = 0.0f;
+
 		for(int i=0; i<planList.Count; i++)
 		{
+			startTime = Time.realtimeSinceStartup;
 			switch(planList[i].Type)
 			{
 				case Action.ActionType.STAY:
@@ -285,6 +294,7 @@ public class AgentDirector : MonoBehaviour {
 					ActionArbiter.Instance.requestAction(agent, agent, ActionArbiter.ActionType.EXTRACT);
 					break;
 			}
+			agent.Behavior.actionTimeTaken(Time.realtimeSinceStartup-startTime); // Somewhat wonky with the STAY in there
 		}
 	}
 	
@@ -292,10 +302,10 @@ public class AgentDirector : MonoBehaviour {
 	// given a duration of movement.
 	private void moveAgentTowards(Agent agent, Vector2 target, float duration)
 	{
-		float intendedDistance = Vector2.Distance(agent.Location, target);
+//		float intendedDistance = Vector2.Distance(agent.Location, target);
 		float netSpeedMultiplier = duration * _moveSpeed * _simulationSpeed * agent.SpeedMultiplier;
 
-		netSpeedMultiplier = Mathf.Clamp(netSpeedMultiplier, netSpeedMultiplier, intendedDistance);
+		netSpeedMultiplier = Mathf.Clamp(netSpeedMultiplier, netSpeedMultiplier, Vector2.Distance(agent.Location, target));
 
 		Vector2 newPoint = agent.Location + (target - agent.Location).normalized * netSpeedMultiplier;
 		

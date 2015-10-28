@@ -32,12 +32,12 @@ public class FallThroughBehavior : AgentBehavior
 		}
 	}
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		bool planCleared = false;
 		for(int i=0; i<this.behaviorList.Count; i++)
 		{
-			if(behaviorList[i].updatePlan(percepts, allottedWorkUnits))
+			if(behaviorList[i].updatePlan(null, 0.0f))
 			{
 				if(!planCleared)
 				{

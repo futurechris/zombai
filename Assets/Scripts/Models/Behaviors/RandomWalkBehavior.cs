@@ -7,7 +7,7 @@ public class RandomWalkBehavior : AgentBehavior
 	float updateDelay = 1.0f;
 	float nextUpdate = float.MinValue;
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.MoveInUse)
 		{
@@ -15,7 +15,7 @@ public class RandomWalkBehavior : AgentBehavior
 		}
 
 		// only update every so often
-		if(nextUpdate > Time.time)
+		if(nextUpdate > Time.realtimeSinceStartup)
 		{
 			return true;
 		}
@@ -34,7 +34,7 @@ public class RandomWalkBehavior : AgentBehavior
 
 		this.currentPlans.Add(newAction);
 
-		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.realtimeSinceStartup + 0.5f + (Random.value * updateDelay);
 
 		return true;
 	}

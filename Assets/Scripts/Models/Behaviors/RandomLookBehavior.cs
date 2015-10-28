@@ -8,7 +8,7 @@ public class RandomLookBehavior : AgentBehavior
 	float nextUpdate = float.MinValue;
 	float angle = 0.0f;
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.LookInUse)
 		{
@@ -16,7 +16,7 @@ public class RandomLookBehavior : AgentBehavior
 		}
 
 		// only change the "plan" every so often.
-		if(nextUpdate > Time.time)
+		if(nextUpdate > Time.realtimeSinceStartup)
 		{
 			return true;
 		}
@@ -28,7 +28,7 @@ public class RandomLookBehavior : AgentBehavior
 		currentPlans.Clear();
 		currentPlans.Add(newAction);
 		
-		nextUpdate = Time.time + 0.5f + (Random.value * updateDelay);
+		nextUpdate = Time.realtimeSinceStartup + 0.5f + (Random.value * updateDelay);
 
 
 		return true;

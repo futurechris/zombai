@@ -261,6 +261,7 @@ public class Agent
 		tempFTB.addBehavior( new RandomLookBehavior() );
 		
 		Behavior = (tempFTB);
+//		Behavior = new RandomWalkBehavior();
 	}
 
 	private void configureAsPlayableHuman()

@@ -43,6 +43,9 @@ public class WorldMap
 	private int corpseCount 	= 0;
 	private int survivorCount	= 0;
 
+	private float _perceptTotalTime = 0.0f;
+	private float _perceptTotalCount = 1.0f;
+
 	#endregion Bookkeeping
 	//////////////////////////////////////////////////////////////////
 
@@ -250,6 +253,7 @@ public class WorldMap
 	// Agent perceives world through this function alone.
 	public void getPercepts(Agent agent, float perfectVisionRange)
 	{
+		float startTime = Time.realtimeSinceStartup;
 		agent.resetPercepts();
 
 		AgentPercept tempPercept;
@@ -309,6 +313,8 @@ public class WorldMap
 				}
 			}
 		}
+		_perceptTotalTime += (Time.realtimeSinceStartup-startTime);
+		_perceptTotalCount++;
 	}
 
 	public bool canPerceivePosition(Agent who, Vector2 where, float perfectVisionRange)
@@ -423,6 +429,11 @@ public class WorldMap
 	public float getHeight()
 	{
 		return worldHeight;
+	}
+
+	public float expectedPerceptCost()
+	{
+		return _perceptTotalTime / _perceptTotalCount;
 	}
 
 	#endregion Getters/Setters

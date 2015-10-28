@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ExtractionBehavior : AgentBehavior {
 	
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		Action newAction;
 		

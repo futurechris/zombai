@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class BoidsBehavior : AgentBehavior {
 
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		Action newMoveAction;
 		Action newLookAction;
@@ -25,9 +25,9 @@ public class BoidsBehavior : AgentBehavior {
 
 		if(found && !_myself.MoveInUse && !_myself.LookInUse)
 		{
-			Vector2 separationVector = calculateSeparationVector(_myself.PerceptPool,allottedWorkUnits, separationThreshold);
-			Vector2 alignmentVector = calculateAlignmentVector(_myself.PerceptPool,allottedWorkUnits);
-			Vector2 cohesionVector = calculateCohesionVector(_myself.PerceptPool,allottedWorkUnits);
+			Vector2 separationVector = calculateSeparationVector(_myself.PerceptPool, separationThreshold);
+			Vector2 alignmentVector = calculateAlignmentVector(_myself.PerceptPool);
+			Vector2 cohesionVector = calculateCohesionVector(_myself.PerceptPool);
 
 			Vector2 moveVector = 
 					  separationWeight * separationVector
@@ -53,7 +53,7 @@ public class BoidsBehavior : AgentBehavior {
 	}
 
 	// position we'd like to move/turn towards to alleviate "excess cohesion"
-	private Vector2 calculateSeparationVector(List<AgentPercept> percepts, int allottedWorkUnits, float separationThreshold)
+	private Vector2 calculateSeparationVector(List<AgentPercept> percepts, float separationThreshold)
 	{
 		Vector2 result = Vector2.zero;
 
@@ -75,7 +75,7 @@ public class BoidsBehavior : AgentBehavior {
 	}
 
 	// position we'd like to turn towards (gradually) to align our direction with others'
-	private Vector2 calculateAlignmentVector(List<AgentPercept> percepts, int allottedWorkUnits)
+	private Vector2 calculateAlignmentVector(List<AgentPercept> percepts)
 	{
 		float numAlignments = 0;
 		float alignmentSum = 0.0f;
@@ -106,7 +106,7 @@ public class BoidsBehavior : AgentBehavior {
 	}
 
 	// position we'd like to move towards to alleviate "excess separation"
-	private Vector2 calculateCohesionVector(List<AgentPercept> percepts, int allottedWorkUnits)
+	private Vector2 calculateCohesionVector(List<AgentPercept> percepts)
 	{
 		Vector2 result = Vector2.zero;
 		int agentCount = 0;

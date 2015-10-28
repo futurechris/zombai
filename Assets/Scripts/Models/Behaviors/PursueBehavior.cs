@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PursueBehavior : AgentBehavior
 {
 	// pursue nearest living agent
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+	public override bool executePlanUpdate()
 	{
 		if(_myself.MoveInUse)
 		{

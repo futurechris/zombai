@@ -2,9 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ZombifyBehavior : AgentBehavior {
-
-	public override bool updatePlan(List<AgentPercept> percepts, int allottedWorkUnits)
+public class ZombifyBehavior : AgentBehavior
+{
+	public override bool executePlanUpdate()
 	{
 		// If you're within convertRange of a brain, try to grab't!
 		// Can only grab one though, so grab the closest one.
